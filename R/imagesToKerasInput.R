@@ -4,12 +4,12 @@
 #' @description This function converts a tibble of images into input for TensorFlow models in keras. Specifically, images are converted to 4D arrays (image, height, width, channels). It can process color images and masks (for model training).
 #' @param images tibble containing magick images (e.g. output of \code{loadImages})
 #' @param type character. Can be "image" or "mask" and will set color channels of array accordingly (optional).
-#' @param colorspace character. Color images are "sRGB", grayscale images and masks are "Gray".
-#' @param n_class For mask images, how many classes do they contain?
+#' @param grayscale logical. Defines color channels of images: 1 if code{TRUE}, 3 if \code{FALSE}.
+#' @param n_class For mask images, how many classes do they contain? (note that binary classifications like the canopy model have 1 class only - sky)
 #'
 #' @details The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'colorspace'.
 #' \code{type = "image"} can have either colorspace "sRGB" or "Gray", masks are always "Gray". color images have three color channels in the arrays, grayscale images have one color channel.
-#' \code{n_class} is only relevant for masks. It determines the dimensions of the output. The default 1 is the (binary case). Higher values are for multi-class cases. If n_class is 2 or larger, keras::to_categorical() will be applied.
+#' \code{n_class} is only relevant for masks. It determines the dimensions of the output. The default 1 is the (binary case). Higher values are for multi-class cases. If n_class is 2 or larger, keras::to_categorical() will be applied, and the \code{\link{u_net}} model will use softmax instead of sigmoid activation in the final layer.
 #'
 #' @return An array with the following dimensions: image, height, width, channels
 #' @export
@@ -19,11 +19,21 @@
 #'
 #' @examples
 #' # Example 1: Canopy
+#' 
+#' # images
 #' wd_images_can <- system.file("images/canopy/resized",
 #'                              package = "imageseg")
 #' images_can <- loadImages(imageDir = wd_images_can)
 #' x <- imagesToKerasInput(images_can)
 #' str(x)   # a 4D array with an attribute data frame
+#'
+#' # masks
+#' 
+#' wd_mask_can <- system.file("images/canopy/masks",
+#'                              package = "imageseg")
+#' masks_can <- loadImages(imageDir = wd_mask_can)
+#' y <- imagesToKerasInput(masks_can, type = "mask", grayscale = TRUE)
+#' str(y)   # a 4D array with an attribute data frame
 #'
 #' # Example 2: Understory
 #' wd_images_us <- system.file("images/understory/resized",
@@ -33,8 +43,8 @@
 #' str(x)   # a 4D array, with an attribute data frame
 #'
 imagesToKerasInput <- function(images,
-                               type = NULL,         # "image" or "mask"
-                               colorspace = NULL,   # "sRGB", "Gray"    # 3 for  color images, 1 for grayscale and masks
+                               type = NULL,
+                               grayscale = NULL,
                                n_class = 1) {
 
 
@@ -50,7 +60,7 @@ imagesToKerasInput <- function(images,
     type <- match.arg(type, c("image", "mask"))
 
     if(type == "mask") {
-      if(hasArg(colorspace)) if(colorspace != "Gray") message("type = 'mask', therefore colorspace is set to Gray")
+      if(hasArg(grayscale)) if(grayscale != TRUE) message("type = 'mask', therefore grayscale is set to TRUE")
       colorspace <- "Gray"
       channels <- 1
     }
@@ -58,24 +68,30 @@ imagesToKerasInput <- function(images,
 
 
   # guess colorspace if not specified
-  if(!methods::hasArg(colorspace)) {
+  if(!methods::hasArg(grayscale)) {
     if(all(image_info_df$colorspace == "Gray")) {
       message("colorspace is Gray")
       channels <- 1
+      colorspace <- "Gray"
     }
     if(all(image_info_df$colorspace == "sRGB")) {
       message("colorspace is sRGB")
       channels <- 3
+      colorspace <- "sRGB"
     }
 
-    if(length(unique(image_info_df$colorspace)) >= 2 ) stop(paste("Multiple values for colorspace:", paste(unique(image_info_df$colorspace), collapse = ", "), ". Please define 'colorspace'."))
+    if(length(unique(image_info_df$colorspace)) >= 2 ) stop(paste("Different colorspaces in input images:", paste(unique(image_info_df$colorspace), collapse = ", "), ". Please define 'grayscale'."))
   } else {
 
-    colorspace <- match.arg(colorspace, c("sRGB", "Gray"))
-    if(colorspace == "Gray") channels <- 1
-    if(colorspace == "sRGB")channels <- 3
+    channels <- if (grayscale) 1 else 3
+    
+    if(channels == 1) colorspace <- "Gray"
+    if(channels == 3) colorspace <- "sRGB"
+    # colorspace <- match.arg(colorspace, c("sRGB", "Gray"))
+    # if(colorspace == "Gray") channels <- 1
+    # if(colorspace == "sRGB") channels <- 3
 
-    if(length(unique(image_info_df$colorspace)) >= 2) message(paste("Multiple values for colorspace:", paste(unique(image_info_df$colorspace), collapse = ", "), ". Will convert all to",  colorspace))
+    if(length(unique(image_info_df$colorspace)) >= 2) message(paste("Different colorspaces in input images:", paste(unique(image_info_df$colorspace), collapse = ", "), ". Will convert all to",  colorspace))
 
     # force colorspace
     images$img <- magick::image_convert(images$img, colorspace = colorspace)
@@ -125,7 +141,7 @@ imagesToKerasInput <- function(images,
     if(type == "mask"){
       if(n_class == 1){
         if(!all(unique(as.vector(array_out)) %in% c(0,1))) {
-          warning(paste("masks are not discrete. Found", length(unique(as.vector(array_out))), "unique values. Fixed through rounding."))
+          message(paste("masks are not discrete. Found", length(unique(as.vector(array_out))), "unique values. Fixed through rounding."))
           array_out <- round(array_out)
         }
       }
