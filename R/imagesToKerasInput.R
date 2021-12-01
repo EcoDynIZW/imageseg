@@ -73,10 +73,7 @@ imagesToKerasInput <- function(images,
 
     colorspace <- match.arg(colorspace, c("sRGB", "Gray"))
     if(colorspace == "Gray") channels <- 1
-    if(colorspace == "sRGB"){
-      channels <- 3
-      #if(hasArg(binary)) message("If colorspace = 'sRGB', argument 'binary' will have no effect")
-    }
+    if(colorspace == "sRGB")channels <- 3
 
     if(length(unique(image_info_df$colorspace)) >= 2) message(paste("Multiple values for colorspace:", paste(unique(image_info_df$colorspace), collapse = ", "), ". Will convert all to",  colorspace))
 

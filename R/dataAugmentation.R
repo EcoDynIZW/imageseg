@@ -42,10 +42,6 @@ dataAugmentation <- function(images,
                              hue_shift_lim = c(80, 120),
                              fraction_random_BSH = 0) {
 
-  # library(snow)
-  # cl <- makeCluster(2)
-  # clusterExport(cl, list = c("images", "rotation_angles", "flip", "flop"))
-  # clusterCall(cl, fun = function() library(magick))
 
   if(fraction_random_BSH < 0) stop("fraction_random_BSH must be postive")
   if(fraction_random_BSH > 1) stop("fraction_random_BSH must be between 0 and 1")
@@ -59,11 +55,8 @@ dataAugmentation <- function(images,
   if(!0 %in% rotation_angles) warning("0 is not in rotation_angles. That will remove the original images from the augmented image set")
 
   if(any(rotation_angles %% 90 != 0)) warning("Some rotation_angles are not multiples of 90. These rotated images will have different dimensions than the originals and might not be valid model input. ")
-  #out <- parLapply(cl, x = images, fun =
-
-  # apply rotation to all images and mirror as requested
-  #out <- lapply(images$img, FUN =  function(image_list_item) {
-  #apply rotations and save output as list of 'magick-image' tibbles
+ 
+  # apply rotation to all images 
   images_aug_list <- lapply(rotation_angles, FUN = function(degrees) magick::image_rotate(images$img, degrees = degrees))
   images_aug_info <- lapply(rotation_angles, FUN = function(x) data.frame(cbind(images$info, rotation = x)))
   images_aug_info <- do.call(rbind, images_aug_info)
@@ -92,9 +85,6 @@ dataAugmentation <- function(images,
   images_aug <- do.call("c", images_aug_list)
   attr(images_aug, "info") <- images_aug_info
 
-  #images_aug
-  # })
-  # stopCluster(cl)
 
   if(fraction_random_BSH != 0) {
     out2 <- randomBSH(img = images_aug,
@@ -122,20 +112,15 @@ randomBSH <- function(img,
                       hue_shift_lim)
 {
 
-  #if (rnorm(1) < u) return(img)   # 50/50 chance of running the modulation.
-
 
   modify_these <- sort(sample(1:length(img), size = round(fraction_random_BSH * length(img))))
-  #img_to_modify <- img[modify_these]
-
+ 
   df_info <- attr(img, "info")
   df_info$brightness_shift <- 100
   df_info$saturation_shift <- 100
   df_info$hue_shift        <- 100
-  #img_dont_modify <- img$img[-modify_these]
 
-  #img_modified_list <- list()
-  for(i in modify_these){ #1:length(img_to_modify)){
+    for(i in modify_these){
 
     brightness_shift <- runif(1,
                               brightness_shift_lim[1],
@@ -151,7 +136,7 @@ randomBSH <- function(img,
                                            brightness = brightness_shift,
                                            saturation =  saturation_shift,
                                            hue = hue_shift)
-#    out$img[i] <- img_modified
+    
     img[i] <- img_modified
 
     df_info[i,]$brightness_shift <- brightness_shift

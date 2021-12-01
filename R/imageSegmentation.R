@@ -246,49 +246,16 @@ imageSegmentation <- function(model,
     mean_predicted  <- round(sapply(predictions_binary_list, FUN = function(x) mean(x, na.rm = T)), 3)
     mean_not_predicted <- round(sapply(predictions_binary_list, FUN = function(x) 1 - mean(x, na.rm = T)), 3)
 
-
-    # # calculate vegetation density in areas that are not overexposed
-    # img_overexposed_list <- x %>% array_branch(margin_x)
-    # img_overexposed_list <- lapply(img_overexposed_list, FUN = function(x_img){
-    #   1- (x_img[,,1] == 1 & x_img[,,2] == 1 & x_img[,,3] == 1)          # change to | to ensure no overexposure in any channel?
-    # })
-    #
-    # predictions_binary_list2 <- list()
-    # for(i in 1:length(predictions_binary_list)){
-    #   predictions_binary_list2[[i]] <- predictions_binary_list[[i]] * img_overexposed_list[[i]]
-    # }
-    #
-    # mean_predicted_corr <- round(sapply(predictions_binary_list2, FUN = function(x) mean(x, na.rm = T)), 3)
-    # mean_not_predicted_corr <- round(sapply(predictions_binary_list2, FUN = function(x) 1 - mean(x, na.rm = T)), 3)
-
-
     if(exists("info_df")){
       if(nrow(info_df) != length(mean_not_predicted)) stop("mismatch in length of file info attributes in x and predictions based on x")
       if(nrow(info_df) != length(images_from_prediction$image)) stop("mismatch in length of file info attributes in x and input images in x")
     }
-
-
-
-    # # calculate % overexposed in original images (255 in all channels)
-    # if(hasArg(subsetArea)) {
-    #   frac_overexposed <- round(colSums(apply(x, c(1), FUN = function(x_img){
-    #     x_img[,,1] <- x_img[,,1] * subsetArea                        # multiply one channel with mask, so it is excluded
-    #     apply(x_img, c(1,2), FUN = function(x_img_channels){
-    #       sum(x_img_channels) == 3
-    #     })})) / (dim(x)[2] * dim(x)[3]), 3)
-    #
-    # } else {
-    #   frac_overexposed <- round(colSums(apply(x, c(1), FUN = function(x_img){
-    #     apply(x_img, c(1,2), FUN = function(x_img_channels) sum(x_img_channels) == 3)})) / (dim(x)[2] * dim(x)[3]), 3)
-    # }
-
   }  # end     if(n_class == 1)
 
 
 
 
   # if it's a multi-class prediction, calculate percentage of each predicted class
-
   if(n_class > 1){
 
     # remove subsetArea from values to summarize
@@ -367,12 +334,6 @@ imageSegmentation <- function(model,
         # plot input image
         magick::image_append(images_from_prediction$image[in_this_sample], stack = TRUE),
 
-
-        # plot prediction with % canopy cover
-        # magick::image_append(magick::image_annotate(images_from_prediction$prediction[in_this_sample],
-        #                                             text = text_to_add,
-        #                                             color = "red", size = 16, gravity = "Center"),      # maybe need to change size when using larger images (tested with 32px)
-        #                      stack = TRUE),
 
         # plot prediction with % canopy cover
         magick::image_append(images_from_prediction$prediction[in_this_sample], stack = TRUE),

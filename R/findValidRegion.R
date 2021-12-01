@@ -72,7 +72,7 @@ findValidRegion <- function(image,
   tmp2 <- cbind(tmp, t(col2rgb(tmp$col)))
 
   # convert image to grayscale using formula from Li et al 2020
-  tmp2$L = 0.30 * tmp2$red + 0.59 * tmp2$green + 0.11 * tmp2$blue
+  tmp2$L <- 0.30 * tmp2$red + 0.59 * tmp2$green + 0.11 * tmp2$blue
 
 
   # # get ranges of "lightness" ($L) values for each row / column

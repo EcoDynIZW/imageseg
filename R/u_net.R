@@ -79,15 +79,14 @@ u_net <- function(net_h,
       #                                                    strides = 2,
       #                                                    padding = "same")
 
-      # habitatnet / imageseg: layer_upsampling_2d
+      # habitatnet / imageseg: layer_upsampling_2d (also below)
       conv_tr_layers[[block]] <- layer_upsampling_2d(object = conv_layers[[blocks + block]],
                                                     size = c(2, 2))
 
 
-      #conv_tr_layers[[block]] <- layer_concatenate(inputs = list(conv_tr_layers[[block]], conv_layers[[blocks - block + 1]])) # %>%        #layer_dropout(rate = dropout)
-      conv_tr_layers[[block]] <- layer_concatenate(inputs = list(conv_layers[[blocks - block + 1]], conv_tr_layers[[block]])) # %>%
+      conv_tr_layers[[block]] <- layer_concatenate(inputs = list(conv_layers[[blocks - block + 1]], conv_tr_layers[[block]]))
       if(dropout != 0) conv_tr_layers[[block]] <- conv_tr_layers[[block]] %>% layer_dropout(rate = dropout)
-        #layer_dropout(rate = dropout)
+
 
       conv_layers[[blocks + block + 1]] <- u_net_double_conv2d(input = conv_tr_layers[[block]],
                                                                filters = filters * 2^(blocks - block),
@@ -104,8 +103,8 @@ u_net <- function(net_h,
                                                   batch_normalization = batch_normalization,
                                                   kernel_initializer = kernel_initializer)
 
-      pool_layers[[block]] <- layer_max_pooling_2d(conv_layers[[block]], pool_size = 2) #%>%
-        #layer_dropout(rate = dropout)
+      pool_layers[[block]] <- layer_max_pooling_2d(conv_layers[[block]], pool_size = 2)
+      
       if(dropout != 0) pool_layers[[block]] <- pool_layers[[block]] %>% layer_dropout(rate = dropout)
     }
 
@@ -116,18 +115,13 @@ u_net <- function(net_h,
                                                      kernel_initializer = kernel_initializer)
 
     for (block in 1:blocks) {
-      # conv_tr_layers[[block]] <- layer_conv_2d_transpose(object = conv_layers[[blocks + block]],
-      #                                                    filters = filters * 2^(blocks - block),
-      #                                                    kernel_size = 2, ###     kernel_size = 3,
-      #                                                    strides = 2,
-      #                                                    padding = "same")
 
       conv_tr_layers[[block]] <- layer_upsampling_2d(object = conv_layers[[blocks + block]],
                                                      size = c(2, 2))
 
 
-      conv_tr_layers[[block]] <- layer_concatenate(inputs = list(conv_tr_layers[[block]], conv_layers[[blocks - block + 1]])) #%>%
-        #layer_dropout(rate = dropout)
+      conv_tr_layers[[block]] <- layer_concatenate(inputs = list(conv_tr_layers[[block]], conv_layers[[blocks - block + 1]]))
+      
       if(dropout != 0) conv_tr_layers[[block]] <- conv_tr_layers[[block]] %>% layer_dropout(rate = dropout)
 
       conv_layers[[blocks + block + 1]] <- u_net_triple_conv2d(input = conv_tr_layers[[block]],
