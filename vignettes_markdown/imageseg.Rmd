@@ -292,6 +292,12 @@ Only model training is painfully slow on a CPU and benefits hugely from being ru
 
 Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. Below are the download links to the hdf5 file containing the trained models (both the model architecture and learned weights).
 
+
+```{r}
+stop("CHANGE LINKS")
+```
+
+
 **Canopy model**: https://www.dropbox.com/s/q4xztzzbmxzxwdy/imageseg_canopy_model.hdf5?dl=1
 
 **Understory model**: https://www.dropbox.com/s/wb38mlb6agl09y0/imageseg_understory_model.hdf5?dl=1
@@ -1365,13 +1371,13 @@ magick::image_append( c(
 magick::image_append(c(img$img[1], img$img[2]), stack = T),
 magick::image_append(c(mask$img[1], mask$img[2]), stack = T )
 ))
-
+# note: image_append() is only for combining and arranging images
 ```
 
 
 Convert images and masks to 4D arrays for keras:
 ```{r}
-x <- imagesToKerasInput(images = img, type = "image", colorspace = "Gray")
+x <- imagesToKerasInput(images = img, type = "image", grayscale = TRUE)
 y <- imagesToKerasInput(images = mask, type = "mask")
 ```
 
@@ -1496,6 +1502,7 @@ out$examples[2]
 ```
 
 
-The models are not perfect, but then it is a relatively small data set and we did not even do any data augmentation, which would almost certainly have improved predictions. 
+Model performance is not perfect, but decent for demonstration. It is a relatively small data set, we did not do any data augmentation, which would almost certainly have improved predictions, and did not use any callbacks to e.g. reduce learning rate and further improve accuracy.
+
 
 
