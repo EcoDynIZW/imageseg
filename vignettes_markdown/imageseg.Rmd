@@ -195,7 +195,7 @@ Python exception encountered:
 You can install TensorFlow using the install_tensorflow() function.
 ```
 
-even though you installed keras successfully, it means that Python is looking for tensorflow in the wrong place. Note that the folder shown may differ depending on your setup, it can for example also be something like: 
+even though you installed keras successfully, it means that Python is looking for Tensorflow in the wrong place. Note that the folder shown may differ depending on your setup, it can for example also be something like: 
 
 ```{r eval = FALSE}
 ...
@@ -247,7 +247,7 @@ you should see in the last line of TensorFlow output:
 tf.Tensor(b'Hello Tensorflow', shape=(), dtype=string)
 ```
 
-(maybe some messages in red also, but check the last line (printed in black in RStudio)). 
+(maybe some messages in red also, but check the last line printed in black in RStudio). 
 
 This lets you know that R now communicates with TensorFlow and you are ready to proceed.
 
@@ -269,12 +269,13 @@ If you see the error:
  py_config()  produziert:        Error in main_process_python_info() : function 'Rcpp_precious_remove' not provided by package 'Rcpp'
 ```
 
-Try updating the R package Rcpp:
+update the R package Rcpp:
 
 ```{r eval = FALSE}
 install.packages('Rcpp')
 ```
 
+and then try again.
 
 
 
@@ -290,14 +291,21 @@ Only model training is painfully slow on a CPU and benefits hugely from being ru
 
 ## Downloading the pre-trained models
 
-Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. Below are the download links to the hdf5 file containing the trained models (both the model architecture and learned weights).
+Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. Below are the download links to the hdf5 file containing the trained models. The hdf5 files contain the entire the model architecture and the learned weights.
 
-**Canopy model**: https://www.dropbox.com/s/q4xztzzbmxzxwdy/imageseg_canopy_model.hdf5?dl=1
+**Canopy model**: https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
 
-**Understory model**: https://www.dropbox.com/s/wb38mlb6agl09y0/imageseg_understory_model.hdf5?dl=1
+**Understory model**: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
 
 
-Download the model you need and put the file in a suitable location. We will later use a function to load it into R. File size is about 90 Mb per model.
+Download the model you need and put the model file in a suitable location. We will later use the function loadModel() to load them into R. File size is about 90 Mb per model.
+
+## Classification examples
+
+Some example classifications of test data (which the model was not trained on) are available from: 
+
+**Canopy model**: https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0
+**Understory model**: https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
 
 
 
@@ -305,17 +313,24 @@ Download the model you need and put the file in a suitable location. We will lat
 
 This is only needed if you wish to train your own models. In that case you can download the training data from:
 
-**Canopy training data**  https://www.dropbox.com/s/j96ncev8dxlr44y/canopy_training_data.zip?dl=0
+**Canopy training data**:  https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
 
-**Understory training data**  https://www.dropbox.com/s/n2s5uqb4ber8nb1/understory_training_data.zip?dl=0
+**Understory training data**: https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1
 
 
-If you only want to use the models for predictions on your own photos, you don't need to download the training data. 
+The zip files contain all images used for model training, validation and evaluation. 
+
+If you only want to use the pre-trained models for predictions on your own photos, you don't need to download the training data. 
 
 
 ## Running imageseg on a graphics card (GPU)
 
-While it is possible to run everything on CPU, lots of deep learning applications benefit from running on graphics cards (GPUs). More specifically, Nvidia GPUs are supported via the CUDA library. On our machines, we used:
+While it is possible to run everything on CPU, deep learning applications often benefit from running on graphics cards (GPUs). More specifically, Nvidia GPUs are supported via the CUDA library. On our workstation we used an Nvidia GTX 1660 Super GPU with the following software:
+
+```{r}
+stop("Check versions")
+```
+
 
 * R 4.1.1
 * CUDA v10.1.105 
@@ -345,7 +360,8 @@ install_github("jniedballa/imageseg", build_vignettes = TRUE)
 # Part 1: Sample workflow for canopy cover classification
 
 
-We first load the imageseg package
+We first load the imageseg package:
+
 ```{r}
 library(imageseg)
 ```
@@ -1139,169 +1155,169 @@ out$examples[2]
 
 
 
-## Example 2: Separate handwritten digits from their background and edges
+<!-- ## Example 2: Separate handwritten digits from their background and edges -->
 
-This example looks more complicated than above because we don't start with images on a hard disk, but with training data included in R. So we need to do some pre-processing to create a data set for demonstration. In real-world applications, you can use all the functions shown above in Part 2 and in the Example 1 of Part 4, and only need to change the argument `n_class` in `u_net()`. All the other functions would be exactly the same as shown above and not hacky as below. 
+<!-- This example looks more complicated than above because we don't start with images on a hard disk, but with training data included in R. So we need to do some pre-processing to create a data set for demonstration. In real-world applications, you can use all the functions shown above in Part 2 and in the Example 1 of Part 4, and only need to change the argument `n_class` in `u_net()`. All the other functions would be exactly the same as shown above and not hacky as below.  -->
 
-The task: Classify image background, the written digit, and the outline of the digits as three separate classes. 
+<!-- The task: Classify image background, the written digit, and the outline of the digits as three separate classes.  -->
 
-### Dataset preparation
+<!-- ### Dataset preparation -->
 
-This section contains all the pre-processing for building a small image segmentation data set from the MNIST data. None of this is necessary if you work with read image data. It is only for demonstration. Many of these tasks (and more) are normally done internally by our package.
-
-
-
-
-Load MNIST dataset (this can take a while when you first run it).
-
-```{r}
-mnist <- dataset_mnist()
-x_train <- mnist$train$x
-x_test <- mnist$test$x
-```
-
-Subset for faster model training. 
-```{r}
-x_train <- x_train[1:1000,,]
-x_test  <- x_test[1:100,,]
-```
-
-
-U-net requires RGB (color) images as input, but MNIST data are grayscale. For demonstration only, we will convert the grayscale MNIST digits to color images. 
-
-```{r}
-# make fake RGB and add some Noise
-x_train_rgb <- array(NA, dim = c(1000, 28, 28, 3))
-x_train_rgb [,,,1] <- x_train / 1.2 + rpois(length(x_train), 10)     # Red
-x_train_rgb [,,,2] <- x_train / 2 + rpois(length(x_train), 7) + 10   # Green
-x_train_rgb [,,,3] <- x_train / 2 + rpois(length(x_train), 20) + 20  # Blue
-```
-
-
-This is what the channels look like:
-```{r}
-par(mfrow = c(1,3))
-image(t(x_train_rgb[1,,,1]), main = "Red", asp = 1, ylim = c(1, 0))
-image(t(x_train_rgb[1,,,2]), main = "Green", asp = 1, ylim = c(1, 0))
-image(t(x_train_rgb[1,,,3]), main = "Blue", asp = 1, ylim = c(1, 0))
-
-```
-
-Here is how these three channels together create a color image:
-
-```{r}
-magick::image_read(as.raster(x_train_rgb[1,,,] / 255))
-```
-
-We need to process the test data in the same way:
-```{r}
-x_test_rgb <- array(NA, dim = c(dim(x_test), 3))
-x_test_rgb [,,,1] <- x_test / 1.5 + rpois(length(x_test), 10)
-x_test_rgb [,,,2] <- x_test / 2 + rpois(length(x_test), 7) + 10
-x_test_rgb [,,,3] <- x_test / 4 + rpois(length(x_test), 20) + 20
-```
-
-Rescale all input images to 0...1 for Keras models (instead of 0...255).
-```{r}
-# rescale
-#x_train <- x_train / 255
-x_train_rgb <- x_train_rgb / 255
-#x_test <- x_test / 255
-x_test_rgb <- x_test_rgb / 255
-```
-
-
-In our little example, we also need to make training labels for each pixel. To do that, we will simply separate the original grayscale into 3 classes based on their brightness. Again, this is only for demonstration that the workflow is compatible with multi-class models.
-
-
-```{r}
-n_classes <- 3
-
-# brightness as list of matrices
-y_train_list <- purrr::array_branch(x_train, 1)
-
-# define 3 classes in every image (requires conversion to vector)
-y_train_list2 <- lapply(y_train_list, FUN = function(x) as.numeric(cut(x, n_classes)) - 1)
-
-# put data back into array
-y_train_tmp <- array(do.call(c, y_train_list2), dim = c(28, 28, 1000))
-
-# change order or array dimensions
-y_train <- aperm(y_train_tmp, c(3,1,2))
-
-# example training mask with 3 classes 
-image(t(y_train[1,,]), ylim = c(1, 0))
-
-#(t() and ylim are necessary for showing mask upright in image())
-```
+<!-- This section contains all the pre-processing for building a small image segmentation data set from the MNIST data. None of this is necessary if you work with read image data. It is only for demonstration. Many of these tasks (and more) are normally done internally by our package. -->
 
 
 
 
-Convert the training data masks to categorical (this normally happens automatically in imagesToKerasInput).
-```{r}
-y_train <- to_categorical(y_train, n_classes)
-```
+<!-- Load MNIST dataset (this can take a while when you first run it). -->
+
+<!-- ```{r} -->
+<!-- mnist <- dataset_mnist() -->
+<!-- x_train <- mnist$train$x -->
+<!-- x_test  <- mnist$test$x -->
+<!-- ``` -->
+
+<!-- Subset for faster model training.  -->
+<!-- ```{r} -->
+<!-- x_train <- x_train[1:1000,,] -->
+<!-- x_test  <- x_test[1:100,,] -->
+<!-- ``` -->
+
+
+<!-- U-net requires RGB (color) images as input, but MNIST data are grayscale. For demonstration only, we will convert the grayscale MNIST digits to color images.  -->
+
+<!-- ```{r} -->
+<!-- # make fake RGB and add some Noise -->
+<!-- x_train_rgb <- array(NA, dim = c(1000, 28, 28, 3)) -->
+<!-- x_train_rgb [,,,1] <- x_train / 1.2 + rpois(length(x_train), 10)     # Red -->
+<!-- x_train_rgb [,,,2] <- x_train / 2 + rpois(length(x_train), 7) + 10   # Green -->
+<!-- x_train_rgb [,,,3] <- x_train / 2 + rpois(length(x_train), 20) + 20  # Blue -->
+<!-- ``` -->
+
+
+<!-- This is what the channels look like: -->
+<!-- ```{r} -->
+<!-- par(mfrow = c(1,3)) -->
+<!-- image(t(x_train_rgb[1,,,1]), main = "Red", asp = 1, ylim = c(1, 0)) -->
+<!-- image(t(x_train_rgb[1,,,2]), main = "Green", asp = 1, ylim = c(1, 0)) -->
+<!-- image(t(x_train_rgb[1,,,3]), main = "Blue", asp = 1, ylim = c(1, 0)) -->
+
+<!-- ``` -->
+
+<!-- Here is how these three channels together create a color image: -->
+
+<!-- ```{r} -->
+<!-- magick::image_read(as.raster(x_train_rgb[1,,,] / 255)) -->
+<!-- ``` -->
+
+<!-- We need to process the test data in the same way: -->
+<!-- ```{r} -->
+<!-- x_test_rgb <- array(NA, dim = c(dim(x_test), 3)) -->
+<!-- x_test_rgb [,,,1] <- x_test / 1.5 + rpois(length(x_test), 10) -->
+<!-- x_test_rgb [,,,2] <- x_test / 2 + rpois(length(x_test), 7) + 10 -->
+<!-- x_test_rgb [,,,3] <- x_test / 4 + rpois(length(x_test), 20) + 20 -->
+<!-- ``` -->
+
+<!-- Rescale all input images to 0...1 for Keras models (instead of 0...255). -->
+<!-- ```{r} -->
+<!-- # rescale -->
+<!-- #x_train <- x_train / 255 -->
+<!-- x_train_rgb <- x_train_rgb / 255 -->
+<!-- #x_test <- x_test / 255 -->
+<!-- x_test_rgb <- x_test_rgb / 255 -->
+<!-- ``` -->
+
+
+<!-- In our little example, we also need to make training labels for each pixel. To do that, we will simply separate the original grayscale into 3 classes based on their brightness. Again, this is only for demonstration that the workflow is compatible with multi-class models. -->
+
+
+<!-- ```{r} -->
+<!-- n_classes <- 3 -->
+
+<!-- # brightness as list of matrices -->
+<!-- y_train_list <- purrr::array_branch(x_train, 1) -->
+
+<!-- # define 3 classes in every image (requires conversion to vector) -->
+<!-- y_train_list2 <- lapply(y_train_list, FUN = function(x) as.numeric(cut(x, n_classes)) - 1) -->
+
+<!-- # put data back into array -->
+<!-- y_train_tmp <- array(do.call(c, y_train_list2), dim = c(28, 28, 1000)) -->
+
+<!-- # change order or array dimensions -->
+<!-- y_train <- aperm(y_train_tmp, c(3,1,2)) -->
+
+<!-- # example training mask with 3 classes  -->
+<!-- image(t(y_train[1,,]), ylim = c(1, 0)) -->
+
+<!-- #(t() and ylim are necessary for showing mask upright in image()) -->
+<!-- ``` -->
 
 
 
-### Model training and predictions.
 
-Now we can create a U-Net architecture for input images of 28x28 pixels. The number of classes is defined in `n_class`. We need to reduce the number of blocks in the model to 2 (default is 4) to ensure the images can be pooled in the contracting path (28 pixels input size leads to 7x7 pixels after 2 contracting blocks and can't be pooled further). 
-
-```{r}
-model <- u_net(28,
-               28,
-               n_class = n_classes,
-               blocks = 2)
-```
+<!-- Convert the training data masks to categorical (this normally happens automatically in imagesToKerasInput). -->
+<!-- ```{r} -->
+<!-- y_train <- to_categorical(y_train, n_classes) -->
+<!-- ``` -->
 
 
-We will use the same loss and coefficients as above
-```{r}
-dice_coef     <- imageseg:::dice_coef
-jaccard_index <- imageseg:::jaccard_index
-```
+
+<!-- ### Model training and predictions. -->
+
+<!-- Now we can create a U-Net architecture for input images of 28x28 pixels. The number of classes is defined in `n_class`. We need to reduce the number of blocks in the model to 2 (default is 4) to ensure the images can be pooled in the contracting path (28 pixels input size leads to 7x7 pixels after 2 contracting blocks and can't be pooled further).  -->
+
+<!-- ```{r} -->
+<!-- model <- u_net(28, -->
+<!--                28, -->
+<!--                n_class = n_classes, -->
+<!--                blocks = 2) -->
+<!-- ``` -->
 
 
-Now we can compile the model. Note that we here choose a different loss than for the binary classification above.
-```{r}
-model %>% compile(
-  optimizer = optimizer_adam(),
-  loss = loss_categorical_crossentropy,
-  metrics = list(custom_metric("dice_coef", dice_coef),
-                 custom_metric("jaccard_index", jaccard_index))
-)
-```
+<!-- We will use the same loss and coefficients as above -->
+<!-- ```{r} -->
+<!-- dice_coef     <- imageseg:::dice_coef -->
+<!-- jaccard_index <- imageseg:::jaccard_index -->
+<!-- ``` -->
 
 
-and fit the model:
-```{r}
-history <- model %>% fit(
-  x_train_rgb , y_train,
-  epochs = 30, batch_size = 128,
-  validation_split = 0.2
-)
-```
-
-We chose 30 epochs for the model to run quickly.
-
-```{r}
-plot(history)
-```
+<!-- Now we can compile the model. Note that we here choose a different loss than for the binary classification above. -->
+<!-- ```{r} -->
+<!-- model %>% compile( -->
+<!--   optimizer = optimizer_adam(), -->
+<!--   loss = loss_categorical_crossentropy, -->
+<!--   metrics = list(custom_metric("dice_coef", dice_coef), -->
+<!--                  custom_metric("jaccard_index", jaccard_index)) -->
+<!-- ) -->
+<!-- ``` -->
 
 
-Training is not complete at this point, but we can already use the model for predictions using imageSegmentation().
-```{r}
-out <- imageSegmentation(model,
-                         x = x_test_rgb)
-```
+<!-- and fit the model: -->
+<!-- ```{r} -->
+<!-- history <- model %>% fit( -->
+<!--   x_train_rgb , y_train, -->
+<!--   epochs = 30, batch_size = 128, -->
+<!--   validation_split = 0.2 -->
+<!-- ) -->
+<!-- ``` -->
 
-Here is one example output. The left column is model input, column 2 shows the most probable classes (hard to see), the remaining columns show the probabilities of each image class as grayscale. 
+<!-- We chose 30 epochs for the model to run quickly. -->
 
-```{r out.height = '90%'}
-out$examples[1]
-```
+<!-- ```{r} -->
+<!-- plot(history) -->
+<!-- ``` -->
+
+
+<!-- Training is not complete at this point, but we can already use the model for predictions using imageSegmentation(). -->
+<!-- ```{r} -->
+<!-- out <- imageSegmentation(model, -->
+<!--                          x = x_test_rgb) -->
+<!-- ``` -->
+
+<!-- Here is one example output. The left column is model input, column 2 shows the most probable classes (hard to see), the remaining columns show the probabilities of each image class as grayscale.  -->
+
+<!-- ```{r out.height = '90%'} -->
+<!-- out$examples[1] -->
+<!-- ``` -->
 
 
 # Part 5: Models using grayscale images
