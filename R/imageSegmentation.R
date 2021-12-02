@@ -22,6 +22,7 @@
 #' @param dirExamples character. Directory to save example classification to (optional)
 #' @param subsetArea If "circle", vegetation density will be calculated for a circular area in the center of the predicted images. Can also be a number between 0 and 1 (to scale the circle relative to the image dimensions), or a matrix of 0 and 1 in the same dimensions as images in x.
 #' @param threshold numeric value at which to split binary predictions. Can be useful to only return high-confidence pixels in predictions. It is not relevant for multi-class predictions.
+#' @param returnInput logical. If \code{dirOutput} is defined, save input images alongside output?
 #'
 #' @details By default, vegetation density will be calculated across the entire input images. If canopy images are hemispherical and have black areas in the corner that should be ignored, set \code{subsetArea} to "circle". If the relevant section of the images is smaller than the image frame, give a number between 0 and 1 (indicating how big the circle is, relative to the image dimensions).
 #' Alternatively, provide a custom matrix of 0 and 1 in the same dimensions as the input images in x. 0 indicates areas to ignore in the vegetation calculations, 1 is included. \code{subsetArea = "circle"} only works if input images in x are square.
@@ -117,7 +118,8 @@ imageSegmentation <- function(model,
                               dirOutput,
                               dirExamples,
                               subsetArea,
-                              threshold = 0.5)
+                              threshold = 0.5,
+                              returnInput = FALSE)
 {
 
 
@@ -393,28 +395,53 @@ imageSegmentation <- function(model,
 
     # use original file names if available
     if(exists("info_df")){
-      filenames_tmp <- strsplit(info_df$filename, .Platform$file.sep, fixed = TRUE)
-      filenames_tmp <- sapply(filenames_tmp, FUN = function(x) x[length(x)])
+      filenames_orig <- strsplit(info_df$filename, .Platform$file.sep, fixed = TRUE)
+      filenames_orig <- sapply(filenames_orig, FUN = function(x) x[length(x)])
+      
 
       # remove extension
-      filenames_out <- sapply(strsplit(filenames_tmp, split = ".", fixed = TRUE), FUN = function(x) x[1])
-      filenames_out <- paste0(filenames_out, "_classified", ".png")
+      filenames_out <- sapply(strsplit(filenames_orig, split = ".", fixed = TRUE), FUN = function(x) x[1])
+      
+      # check for duplicates
+      if(anyDuplicated(filenames_out) != 0){
+        warning("Output file names are not unique. Attempting to make them unique by adding data augmentation information.")
+        
+        
+        if("rotation" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, "_rot", info_df$rotation)
+        if("flip" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, ifelse(info_df$flip, "_flip", ""))
+        if("flop" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, ifelse(info_df$flop, "_flop", ""))
+        # if("brightness_shift" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, ifelse(info_df$brightness_shift != 100, "_B", ""))
+        # if("saturation_shift" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, ifelse(info_df$brightness_shift != 100, "_S", ""))
+        # if("hue_shift" %in% colnames(info_df)) filenames_out <- paste0(filenames_out, ifelse(info_df$brightness_shift != 100, "_H", ""))
+        
+        
+        if(anyDuplicated(filenames_out) != 0) stop("Failed to make file names unique. Please check attr(x, 'info') and ensure there are no duplicates. First duplicate was:\n",
+                                                   filenames_orig[anyDuplicated(filenames_out)])
+      }
+      
+      filenames_out <- paste0(filenames_out, ".png")
+      
+      filenames_out_class <- paste0(filenames_out, "_classified", ".png")
     } else {
-
-      if(n_class == 1) output <- "prediction_binary"
-      if(n_class > 1)  output <- "prediction_most_likely"
-
-      filenames_out <- paste0(seq(1, length(images_from_prediction[[output]])), "_classified.png")
+      filenames_out_class <- paste0(seq(1, length(images_from_prediction[[output]])), "_classified.png")
     }
-
-
-      for(i in 1:length(images_from_prediction[[output]])){
-        magick::image_write(image = images_from_prediction[[output]][i],
+    
+    if(n_class == 1) output <- "prediction_binary"
+    if(n_class > 1)  output <- "prediction_most_likely"
+    
+    for(i in 1:length(images_from_prediction[[output]])){
+      
+      if(returnInput){
+        magick::image_write(image = images_from_prediction$image[i],
                             path = file.path(dirOutput, filenames_out[i]))
       }
+      
+      magick::image_write(image = images_from_prediction[[output]][i],
+                          path = file.path(dirOutput, filenames_out_class[i]))
+    }
   }
-
-
+  
+  
   if(n_class == 1){
     image_summary <- data.frame(not_predicted = mean_not_predicted,
                                 predicted = mean_predicted

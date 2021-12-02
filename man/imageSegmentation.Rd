@@ -10,7 +10,8 @@ imageSegmentation(
   dirOutput,
   dirExamples,
   subsetArea,
-  threshold = 0.5
+  threshold = 0.5,
+  returnInput = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ imageSegmentation(
 \item{subsetArea}{If "circle", vegetation density will be calculated for a circular area in the center of the predicted images. Can also be a number between 0 and 1 (to scale the circle relative to the image dimensions), or a matrix of 0 and 1 in the same dimensions as images in x.}
 
 \item{threshold}{numeric value at which to split binary predictions. Can be useful to only return high-confidence pixels in predictions. It is not relevant for multi-class predictions.}
+
+\item{returnInput}{logical. If \code{dirOutput} is defined, save input images alongside output?}
 }
 \value{
 A list. The type and number of list items depends on the classification. For binary classifications (1 prediction class), the following list items are returned:
