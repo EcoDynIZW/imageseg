@@ -418,10 +418,13 @@ imageSegmentation <- function(model,
         if(anyDuplicated(filenames_out) != 0) stop("Failed to make file names unique. Please check attr(x, 'info') and ensure there are no duplicates. First duplicate was:\n",
                                                    filenames_orig[anyDuplicated(filenames_out)])
       }
+      # filename of classified images
+      filenames_out_class <- paste0(filenames_out, "_classified", ".png")
       
+      # filenames of input images
       filenames_out <- paste0(filenames_out, ".png")
       
-      filenames_out_class <- paste0(filenames_out, "_classified", ".png")
+      
     } else {
       filenames_out_class <- paste0(seq(1, length(images_from_prediction[[output]])), "_classified.png")
     }
