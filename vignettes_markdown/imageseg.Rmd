@@ -359,7 +359,7 @@ install.packages("devtools")
 
 ```{r eval = FALSE}
 library(devtools)
-install_github("jniedballa/imageseg", build_vignettes = TRUE)
+install_github("EcoDynIZW/imageseg", build_vignettes = TRUE)
 ```
 
 # Part 1: Sample workflow for canopy density assessments
@@ -1508,10 +1508,10 @@ Perform image segmentation on test images. Note the argument "threshold", which 
 ```{r}
 out <- imageSegmentation(model,
                          x = x_test,
-                         threshold = 0.9)
+                         threshold = 0.8)
 ```
 
-Again, the left column of the following two example images shows the model input, the central column shows the model prediction (as probability), the right column shows the binary classification (only areas with probability > 0.9 are indicated).
+Again, the left column of the following two example images shows the model input, the central column shows the model prediction (as probability), the right column shows the binary classification (only areas with probability > 0.8 are indicated).
 
 ```{r out.height = '90%'}
 out$examples[1]
