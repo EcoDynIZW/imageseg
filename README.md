@@ -9,7 +9,7 @@ Install the package via:
 
 ``` r
 library(remotes)
-install_github("jniedballa/imageseg", build_vignettes = TRUE)
+install_github("EcoDynIZW/imageseg", build_vignettes = TRUE)
 ```
 
 See the vignette for information about setting up the Keras and TensorFlow. 
