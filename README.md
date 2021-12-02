@@ -1,7 +1,7 @@
 # imageseg
-R package for deep learning image segmentation using U-Net model architecture, implemented in Keras and TensorFlow. It provides pre-trained models for forest structural metrics (canopy density, and understory vegetation density) and a workflow to apply these on custom images.
+R package for deep learning image segmentation using U-Net model architecture, implemented in Keras and TensorFlow. It provides pre-trained models for forest structural metrics (canopy density and understory vegetation density) and a workflow to apply these on custom images.
 
-In addition, it provides a workflow for easily creating model input and model architectures for general-purpose image segmentation, based on grayscale or color images, and providing binary or multi-class image segmentation.
+In addition, it provides a workflow for easily creating model input and model architectures for general-purpose image segmentation based on the U-net architecture. Model can be trained on grayscale or color images, and can provide binary or multi-class image segmentation as output.
 
 # Installation
 
@@ -25,3 +25,16 @@ The pre-trained models for forest canopy density and understory vegetation densi
 **Understory model**: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
 
 Please see the vignette for further information.
+
+Example classifications to give you an impression of model performance:
+
+**Canopy model examples**  https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0
+
+**Understory model examples** https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
+
+
+# Training data download
+
+**Canopy training data**  https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1
+
+**Understory training data**  https://www.dropbox.com/s/s7o7x66l3wiqc6h/understory_training_data_imageseg.zip?dl=1
