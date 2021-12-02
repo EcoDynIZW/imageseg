@@ -180,12 +180,13 @@ resizeImages <- function(imageDir,
       colorspace <- NA
     }
 
-    foreach::foreach(i = lf_images, .packages=c("magick")) %dopar% {
+    foreach::foreach(i = lf_images, .packages=c("magick", "imageseg")) %dopar% {
 
       # load images
       # ::: is necessary within foreach
       # https://stackoverflow.com/questions/36852140/when-does-a-package-need-to-use-for-its-own-objects
-      img <- imageseg:::imageRead(i)
+      #img <- imageseg:::imageRead(i)
+      img <- imageRead(i)
 
 
 
