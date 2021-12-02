@@ -1,5 +1,5 @@
 ---
-title: "A sample session in imageseg"
+title: "Deep learning image segmentation with 'imageseg'"
 author: "Juergen Niedballa (<niedballa@izw-berlin.de>)"
 date: "`r Sys.Date()`"
 output:
@@ -14,7 +14,7 @@ output:
     toc_depth: 2
     df_print: kable
 vignette: |
-  %\VignetteIndexEntry{A sample session in imageseg} %\VignetteEngine{knitr::rmarkdown} \usepackage[utf8]{inputenc}
+  %\VignetteIndexEntry{Introduction to 'imageseg'} %\VignetteEngine{knitr::rmarkdown} \usepackage[utf8]{inputenc}
 always_allow_html: yes
 ---
 
@@ -30,15 +30,21 @@ The imageseg package provides function that allow users to extract information f
 We provide two pre-trained models for forest structural metrics They allow the assessment of:
 
 1) canopy closure and canopy cover from canopy photographs
-2) understory vegetation density from photographs of an orange-red flysheet at a distance from the observer (training data used 10m distance).
+2) understory vegetation density from photographs of a red flysheet at a distance from the observer (training data used 10m distance).
 
-Part 1 of this vignette demonstrates the workflow and shows how the pre-trained models can be used for creating predictions based on images. 
+In this vignette, 
 
-Part 2 of this vignette shows how more advanced users can easily create new model architectures and conduct their own deep learning experiments. 
+Installation and setup walks you through the setup of Keras and TensorFlow.
 
-Part 3 of this vignette shows how users can use the pre-trained models we provide as a foundation and continue training with their own data.
+Part 1 introduces the workflow and shows how pre-trained models can be used for creating predictions based on images. 
 
-Part 3 of this vignette demonstrates how models with multiple classes can be trained and used for predictions (using a toy data set).
+Part 2 shows how more advanced users can easily create new model architectures and conduct their own deep learning experiments. 
+
+Part 3 shows how users can use the pre-trained models we provide as a foundation and continue training with their own data.
+
+Part 4 demonstrates how models with multiple output classes can be trained and used for predictions.
+
+Part 5 demonstrates how models with grayscale input data can be trained and used for binary predictions.
 
 
 ## Differences to other implementations
@@ -151,7 +157,7 @@ WARNING: pip is configured with locations that require TLS/SSL, however the ssl 
 ```
 
 
-It can help to add miniconda to environment paths. Below is a function that temporarily adds directories to the PATH variable . Replace "YourUserName" with the correct user name. 
+It can help to add miniconda to environment paths. The following function temporarily adds directories to the PATH variable. Replace "YourUserName" with the correct user name. 
 
 ```{r eval = FALSE}
 
@@ -293,17 +299,9 @@ Only model training is painfully slow on a CPU and benefits hugely from being ru
 
 Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. Below are the download links to the hdf5 file containing the trained models. The hdf5 files contain the entire the model architecture and the learned weights.
 
-<<<<<<< HEAD
-
-```{r}
-stop("CHANGE LINKS")
-```
 
 
-**Canopy model**: https://www.dropbox.com/s/q4xztzzbmxzxwdy/imageseg_canopy_model.hdf5?dl=1
-=======
 **Canopy model**: https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
->>>>>>> 42e1a2a693fafa72c3250c47b4ddeab09f1695be
 
 **Understory model**: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
 
@@ -315,6 +313,7 @@ Download the model you need and put the model file in a suitable location. We wi
 Some example classifications of test data (which the model was not trained on) are available from: 
 
 **Canopy model**: https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0
+
 **Understory model**: https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
 
 
@@ -323,7 +322,7 @@ Some example classifications of test data (which the model was not trained on) a
 
 This is only needed if you wish to train your own models. In that case you can download the training data from:
 
-**Canopy training data**:  https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
+**Canopy training data**:  https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=0
 
 **Understory training data**: https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1
 
@@ -337,16 +336,12 @@ If you only want to use the pre-trained models for predictions on your own photo
 
 While it is possible to run everything on CPU, deep learning applications often benefit from running on graphics cards (GPUs). More specifically, Nvidia GPUs are supported via the CUDA library. On our workstation we used an Nvidia GTX 1660 Super GPU with the following software:
 
-```{r}
-stop("Check versions")
-```
-
 
 * R 4.1.1
 * CUDA v10.1.105 
 * Keras 2.4.3 (installed automatically by install_keras())
 * TensorFlow 2.2.0 (installed automatically by install_keras())
-* R package keras (2.4.0)
+* R package keras (2.6.1)
 * R package tensorflow (2.4.0)
 
 
@@ -367,15 +362,15 @@ library(devtools)
 install_github("jniedballa/imageseg", build_vignettes = TRUE)
 ```
 
-# Part 1: Sample workflow for canopy cover classification
+# Part 1: Sample workflow for canopy density assessments
 
+The following workflow is demonstrates how the pre-trained model can be used to create predictions of canopy density from canopy photos. The workflow for understory vegetation density is not demonstrated here, but essentially the same (it only requires that input image are manually cropped to the extent of the red flysheet, the rest of the analysis is identical).
 
 We first load the imageseg package:
 
 ```{r}
 library(imageseg)
 ```
-
 
 
 ## Preparing input for imageseg
@@ -456,7 +451,7 @@ Now we have the model and the data ready for analyses.
 
 The canopy model differentiates canopy and sky. 
 
-The understory vegetation model differentiates vegetation and an orange flysheet (and probably more generally, orange objects).
+The understory vegetation model differentiates vegetation and a red flysheet (and probably more generally, orange-red objects).
 
 ### Model predictions on images (v1 - purpose-built function)
 
@@ -523,7 +518,6 @@ predictions <- model %>% predict(x)
 The model predictions can be made binary easily: 
 ```{r}
 predictions_binary <- round(predictions)
-
 ```
 
 And one can calculate vegetation density
@@ -626,7 +620,7 @@ x_all <- imagesToKerasInput(images_aug, type = "image")
 y_all <- imagesToKerasInput(masks_aug, type = "mask")
 ```
 
-## Split the data in training and test data
+## Split data in training and test data
 
 Above we loaded all images together. To evaluate model fit, we need to set aside some test images. 
 
@@ -734,7 +728,7 @@ plot_history
 ```
 
 
-## Evaluation of model
+## Evaluate model
 
 We used the test data created above for model assessments in using the `evaluate` function.
 
@@ -825,9 +819,11 @@ The updated model can be used for predictions as shown above.
 
 # Part 4: Multi-class models
 
-So far, all predictions were binary. Internally, it is a model with 1 class, so in the examples above U-Net learned to recognize sky or the orange flysheet. In models with multiple classes, we can for example train the model to recognize vegetation and the orange flysheet as two separate classes. Applications are not limited to forestry, it can be used for arbitrary image segmentation problems, e.g. in medical images or microscopy as demonstrated below.
+So far, all predictions were binary. Internally, these networks only learn how to predict 1 class, so in the examples above U-Net learned to recognize sky, or the red flysheet. In models with multiple classes, we can for example train the model to recognize vegetation and the red flysheet as two separate classes. Applications are not limited to forestry, it can be used for arbitrary image segmentation problems, e.g. in medical images, cell biology or microscopy as demonstrated below.
 
-Here we will give two examples demonstrating the fundamentals of image segmentation with multiple classes. The first uses microscopic images in which separate cells, bacteria and background. The second example uses MNIST database of handwritten digits which is included in Keras. It is normally used for image classification ("Which digit is written in the image?"), but for demonstration we will use it in image segmentation. 
+Here we will give an example demonstrating the fundamentals of image segmentation with multiple classes. The example contains microscopic images in which the model learns to differentiate red blood cells, bacteria and background. 
+
+<!-- The second example uses MNIST database of handwritten digits which is included in Keras. It is normally used for image classification ("Which digit is written in the image?"), but for demonstration we will use it in image segmentation.  -->
 
 
 
@@ -1117,7 +1113,7 @@ batch_size <- 8
 ```
 
 
-Callbacks can be useful to prevent overfitting. Here we reduce the learning rate when training stagnates (callback_reduce_lr_on_plateau), and stop training it training stagnates a bit longer (callback_early_stopping). The maximum number of epochs is so low (for demonstration) that we will likely not need early stopping though, but it can help in some circumstances.
+Callbacks can be useful to prevent overfitting. Here we reduce the learning rate when training stagnates (callback_reduce_lr_on_plateau), and stop training it training stagnates a bit longer (callback_early_stopping). The maximum number of epochs is so low (for demonstration) that we will likely not need early stopping though, but it can help prevent excessively long model training without further improvements.
 
 ```{r}
 callbacks <- list(callback_early_stopping(restore_best_weights = TRUE, verbose = 1, patience = 5),
@@ -1125,7 +1121,7 @@ callbacks <- list(callback_early_stopping(restore_best_weights = TRUE, verbose =
 ```
 
 
-The call to model fit is a little different than before due to the sampling generator (which is passed to argument x, with y being empty). We also define the validation data explicitly and use callbacks.
+The call to fit() is a little different than before due to the sampling generator (which is passed to argument x, with y being empty). Using the sampling generator also requires us to explicitly define and pass the validation data (instead of just using the validation split). Furthermore this fit() uses the callbacks mentioned above.
 
 ```{r}
 history <- model %>% fit(
@@ -1462,7 +1458,7 @@ model %>% compile(
 Set epochs and batch size:
 
 ```{r}
-epochs <- 30
+epochs <- 20
 batch_size <- 8
 ```
 
@@ -1487,7 +1483,8 @@ history <- model %>% fit(
   x = sampling_generator(x_train, y_train, batch_size = batch_size),
   epochs = epochs,
   steps_per_epoch = round(nrow(x_train) / batch_size),
-  validation_data = list(x_val, y_val)
+  validation_data = list(x_val, y_val),
+  callbacks = callbacks
 )
 ```
 
@@ -1522,7 +1519,7 @@ out$examples[2]
 ```
 
 
-Model performance is not perfect, but decent for demonstration. It is a relatively small data set, we did not do any data augmentation, which would almost certainly have improved predictions, and did not use any callbacks to e.g. reduce learning rate and further improve accuracy.
+Model performance is not perfect since it is a relatively small data set and we did not do any data augmentation here, which would almost certainly have improved predictions.
 
-
+Nevertheless it is decent for demonstration of an image segmentation workflow for grayscale images.
 
