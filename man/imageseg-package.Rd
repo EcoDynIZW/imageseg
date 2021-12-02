@@ -46,22 +46,12 @@ This function assist in creating models in keras based on the U-Net architecture
 }
 
 \section{Download pre-trained models}{
-We provide pre-trained models as hdf5 files. Download the models from:
 
-Canopy model \url{https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1}
+Links to the pre-trained models, example classifications and all training data used can be found in the readme under
 
-Understory model: \url{https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1}
+https://github.com/EcoDynIZW/imageseg
 
-Save the files in a convenient location, and load them via \code{\link{loadModel}}.
-
-
-There are also example classifications based on these models available to give you an impression.
-
-Canopy model examples \url{https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0}
-
-Understory model examples: \url{https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0}
-
-These classified images are part of the test image set. That means that the model has not seen these images and was not trained on them.
+or in the package vignette
 
 }
 
@@ -76,21 +66,9 @@ See \code{example(function)} or the "Examples" section at the bottom of the resp
 
 
 
-\section{Training and test data}{
-
-The training and test data we used are available from:
-
-Canopy training data  \url{https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1}
-
-Understory training data  \url{https://www.dropbox.com/s/s7o7x66l3wiqc6h/understory_training_data_imageseg.zip?dl=1}
-
-Note the data are not split into test and training. We used an 80/20 split for training/test data.
-
-}
-
 \section{Vignette}{
 
-The package contains a pdf vignette demonstrating the workflow for predictions and model training. It covers Installation and setup, model predictions and training the forest structural models, and two more general applications. See \code{browseVignettes(package = "imageseg")}
+The package contains a pdf vignette demonstrating the workflow for predictions and model training. It covers Installation and setup, model predictions and training the forest structural models, and two more general applications. See \code{browseVignettes(package = "imageseg")}.
 
 }
 
