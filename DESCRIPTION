@@ -9,7 +9,7 @@ Authors@R: c(
                    comment = c(ORCID = "0000-0003-1269-5586"))
             )
 Maintainer: Juergen Niedballa <niedballa@izw-berlin.de>
-Description: A general-purpose workflow for image segmentation using TensorFlow models based on the U-Net architecture. We provide pre-trained models for assessing canopy density and understory vegetation density from vegetation photos. In addition, the package provides a workflow for easily creating model input and model architectures for general-purpose image segmentation based on grayscale or color images, both for binary and multi-class image segmentation. 
+Description: A general-purpose workflow for image segmentation using TensorFlow models based on the U-Net architecture by Ronneberger et al. (2015) <arXiv:1505.04597>. We provide pre-trained models for assessing canopy density and understory vegetation density from vegetation photos. In addition, the package provides a workflow for easily creating model input and model architectures for general-purpose image segmentation based on grayscale or color images, both for binary and multi-class image segmentation. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: grDevices, keras, magick, magrittr, methods, purrr, stats, tibble, foreach, parallel, doParallel, dplyr
