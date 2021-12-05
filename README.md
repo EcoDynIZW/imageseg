@@ -1,5 +1,6 @@
 # imageseg
-R package for deep learning image segmentation using U-Net model architecture, implemented in Keras and TensorFlow. It provides pre-trained models for forest structural metrics (canopy density and understory vegetation density) and a workflow to apply these on custom images.
+
+R package for deep learning image segmentation using the U-Net model architecture by Ronneberger (2015), implemented in Keras and TensorFlow. It provides pre-trained models for forest structural metrics (canopy density and understory vegetation density) and a workflow to apply these on custom images.
 
 In addition, it provides a workflow for easily creating model input and model architectures for general-purpose image segmentation based on the U-net architecture. Model can be trained on grayscale or color images, and can provide binary or multi-class image segmentation as output.
 
