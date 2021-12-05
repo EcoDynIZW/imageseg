@@ -1,5 +1,7 @@
 #' Create a U-Net architecture
+#' 
 #' @description Create a U-Net architecture
+#' 
 #' @importFrom magrittr %>%
 #' @importFrom purrr when
 #'
@@ -10,25 +12,55 @@
 #' @param blocks Number of blocks in the model.
 #' @param n_class Number of classes.
 #' @param filters Integer, the dimensionality of the output space (i.e. the number of output filters in the convolution).
-#' @param dropout Dropout rate.
-#' @param batch_normalization Should batch normalization be used in the block.
+#' @param dropout Dropout rate (between 0 and 1).
+#' @param batch_normalization Should batch normalization be used in the block?
 #' @param kernel_initializer Initializer for the kernel weights matrix.
+#' 
 #' @return U-Net model.
 #' @export
 #'
-#' @details This function was adapted and slightly modified from the u_net() function in the platypus package (\url{https://github.com/maju116/platypus/blob/master/R/u_net.R}).
+#' @details This function creates a U-Net model architecture according to user input. It allows flexibility regarding input, output and the hidden layers. 
+#' See the package vignette for examples . #' 
+#' 
+#' The function was adapted and slightly modified from the u_net() function in the platypus package (\url{https://github.com/maju116/platypus/blob/master/R/u_net.R}).
 #'
 #' Differences compared to platypus implementation:
 #'
 #' - added argument: layers_per_block (can be 2 or 3)  \cr
 #' - kernel size in layer_conv_2d_transpose is 2, not 3.  \cr
 #' - dropout layers are only included if user specifies dropout > 0 \cr
-#' - n_class = 1 by default (sufficient for binary classification used for vegetation)  \cr
+#' - n_class = 1 by default (sufficient for binary classification used for vegetation model, e.g. sky or not sky)  \cr
 #' - activation of output layer: "sigmoid" if n_class = 1, otherwise "softmax" \cr
-#' - no checks: allows non-square input (e.g. 160x256)  \cr
+#' - no checks: allows non-square input images (e.g. 160x256 used in understory vegetation density model)  \cr
 #'
 #'
-#' @return A keras model
+#' @return A keras model as returned by \code{\link[keras]{keras_model}}
+#' 
+#' @examples
+#' \dontrun{
+#' # U-Net model for 256x256 pixel RGB input images with a single output class
+#' # this model was used for canopy density
+#' 
+#' model <- u_net(net_h = 256, 
+#' net_w = 256, 
+#' grayscale = FALSE,
+#' filters = 32,
+#' blocks = 4,
+#' layers_per_block = 2
+#' )
+#' 
+#' # several arguments above were not necessary because they were kept at their default. 
+#' # Below is the same model, but shorter:
+#' 
+#' model <- u_net(net_h = 256, 
+#' net_w = 256, 
+#' filters = 32
+#' )
+#' 
+#' model
+#' 
+#' }
+#' 
 
 u_net <- function(net_h,
                   net_w,
