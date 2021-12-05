@@ -388,11 +388,16 @@ imageSegmentation <- function(model,
 
   images_from_prediction$examples <- Reduce(c, out_list)
 
+  
 
   if(hasArg(dirOutput)) {
 
     if(!dir.exists(dirOutput)) dir.create(dirOutput, recursive = TRUE)
 
+    
+    if(n_class == 1) output <- "prediction_binary"
+    if(n_class > 1)  output <- "prediction_most_likely"
+    
     # use original file names if available
     if(exists("info_df")){
       filenames_orig <- strsplit(info_df$filename, .Platform$file.sep, fixed = TRUE)
@@ -426,11 +431,10 @@ imageSegmentation <- function(model,
       
       
     } else {
+      filenames_out <- paste0(seq(1, length(images_from_prediction[[output]])), ".png")
       filenames_out_class <- paste0(seq(1, length(images_from_prediction[[output]])), "_classified.png")
     }
     
-    if(n_class == 1) output <- "prediction_binary"
-    if(n_class > 1)  output <- "prediction_most_likely"
     
     for(i in 1:length(images_from_prediction[[output]])){
       
