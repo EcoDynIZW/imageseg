@@ -6,11 +6,13 @@ Authors@R: c(
             person("Juergen", "Niedballa", email = "niedballa@izw-berlin.de", role = c("aut", "cre"),
                    comment = c(ORCID = "0000-0002-9187-2116")),
             person("Jan", "Axtner", email = "axtner@izw-berlin.de", role = c("aut"),
-                   comment = c(ORCID = "0000-0003-1269-5586"))
+                   comment = c(ORCID = "0000-0003-1269-5586")),
+            person("Leibniz Institute for Zoo and Wildlife Research", role = "cph")
             )
 Maintainer: Juergen Niedballa <niedballa@izw-berlin.de>
 Description: A general-purpose workflow for image segmentation using TensorFlow models based on the U-Net architecture by Ronneberger et al. (2015) <arXiv:1505.04597>. We provide pre-trained models for assessing canopy density and understory vegetation density from vegetation photos. In addition, the package provides a workflow for easily creating model input and model architectures for general-purpose image segmentation based on grayscale or color images, both for binary and multi-class image segmentation. 
 License: MIT + file LICENSE
+BugReports: https://github.com/EcoDynIZW/imageseg/issues
 Encoding: UTF-8
 Imports: grDevices, keras, magick, magrittr, methods, purrr, stats, tibble, foreach, parallel, doParallel, dplyr
 Suggests: R.rsp, testthat
