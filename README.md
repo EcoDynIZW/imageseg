@@ -29,7 +29,7 @@ Please see the vignette for further information.
 
 Example classifications to give you an impression of model performance:
 
-**Canopy model examples**  https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0
+**Canopy model examples**  https://www.dropbox.com/sh/ypxx5rknpgqolxk/AAATyhQ8-wIi5I9aGlekqn7ia?dl=0
 
 **Understory model examples** https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
 
