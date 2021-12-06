@@ -21,7 +21,7 @@ See the vignette for information about setting up the Keras and TensorFlow.
 
 The pre-trained models for forest canopy density and understory vegetation density are available for download:
 
-**Canopy model**: https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
+**Canopy model**: https://www.dropbox.com/s/rtsly7kfag9fzlh/imageseg_canopy_model.hdf5?dl=1
 
 **Understory model**: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
 
