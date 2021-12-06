@@ -297,34 +297,30 @@ Only model training is painfully slow on a CPU and benefits hugely from being ru
 
 ## Downloading the pre-trained models
 
-Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. Below are the download links to the hdf5 file containing the trained models. The hdf5 files contain the entire the model architecture and the learned weights.
+Download the pre-trained models in order to use them on your own canopy images. We provide two separate models, one for canopy cover and one for understory vegetation density. We provide download links to the hdf5 files containing the trained models. The hdf5 files contain the entire model architecture and the learned model weights.
 
 
+The links can be found under: 
 
-**Canopy model**: https://www.dropbox.com/s/jalrvhmh7oo9g4n/imageseg_canopy_model.hdf5?dl=1
-
-**Understory model**: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
+https://github.com/EcoDynIZW/imageseg
 
 
-Download the model you need and put the model file in a suitable location. We will later use the function loadModel() to load them into R. File size is about 90 Mb per model.
+Download the model you need and save the model file in a suitable location. We will later use the function loadModel() to load them into R. File size is about 90 Mb per model.
 
 ## Classification examples
 
-Some example classifications of test data (which the model was not trained on) are available from: 
+Example classifications of test data (which the model was not trained on) are available from: 
 
-**Canopy model**: https://www.dropbox.com/sh/5tm1s8px7xmkrnd/AAC9Hufegpx2B9NAfpwuoc31a?dl=0
 
-**Understory model**: https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
+https://github.com/EcoDynIZW/imageseg
 
 
 
 ## Downloading the training data
 
-This is only needed if you wish to train your own models. In that case you can download the training data from:
+This is only needed if you wish to train your own models. In that case you find the links to the training data under:
 
-**Canopy training data**:  https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=0
-
-**Understory training data**: https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1
+https://github.com/EcoDynIZW/imageseg
 
 
 The zip files contain all images used for model training, validation and evaluation. 
