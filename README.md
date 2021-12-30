@@ -8,6 +8,11 @@ The package can be found on CRAN:
 
 https://cran.r-project.org/web/packages/imageseg/index.html
 
+The preprint of the paper describing the package is available on bioRxiv:
+
+https://doi.org/10.1101/2021.12.16.469125
+
+
 # Installation
 
 Install the package from CRAN via:
