@@ -15,13 +15,19 @@ https://doi.org/10.1101/2021.12.16.469125
 
 # Installation
 
-Install the package from CRAN via:
+First, install the R package "R.rsp" which enables the static vignettes. 
+
+``` r
+install.packages(R.rsp)
+``` 
+
+Install the imageseg package from CRAN via:
 
 ``` r
 install.packages(imageseg)
 ``` 
 
-Alternatively you can install from GitHub (requires remotes package):
+Alternatively you can install from GitHub (requires remotes package and R.rsp):
 
 ``` r
 library(remotes)   
