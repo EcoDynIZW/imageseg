@@ -8,7 +8,7 @@
 Overview of the imageseg package
 }
 \description{
-This package provides a streamlined workflow for image segmentation using deep learning models based on the U-Net architecture by Ronneberger (2015). Image segmentation is the labelling of each pixel in a images with class labels. Models are convolutional neural networks implemented in \pkg{keras} using a TensorFlow backend. The workflow supports grayscale and color images as input, and binary or multi-class output.
+This package provides a streamlined workflow for image segmentation using deep learning models based on the U-Net architecture by Ronneberger (2015) and the U-Net++ architecture by Zhou et al. (2018). Image segmentation is the labelling of each pixel in a images with class labels. Models are convolutional neural networks implemented in \pkg{keras} using a TensorFlow backend. The workflow supports grayscale and color images as input, and binary or multi-class output.
 
 We provide pre-trained models for two forest structural metrics: canopy density and understory vegetation density. These trained models were trained with large and diverse training data sets, allowing for robust inferences. The package workflow is implemented in a few function, allowing for simple predictions on your own images without specialist knowledge of convolutional neural networks.
 
@@ -42,7 +42,7 @@ This function assist in creating models in keras based on the U-Net architecture
 \tabular{ll}{
 \code{\link{dataAugmentation}} \tab Rotating and mirroring images, and modulating colors \cr
 \code{\link{u_net}}  \tab Create a U-Net architecture \cr
-
+\code{\link{u_net_plusplus}}  \tab Create a U-Net++ architecture \cr
 }
 }
 
@@ -76,6 +76,9 @@ Juergen Niedballa, Jan Axtner
 
 Ronneberger O., Fischer P., Brox T. (2015) U-Net: Convolutional Networks for Biomedical Image Segmentation. In: Navab N., Hornegger J., Wells W., Frangi A. (eds) Medical Image Computing and Computer-Assisted Intervention – MICCAI 2015. MICCAI 2015. Lecture Notes in Computer Science, vol 9351. Springer, Cham.
 \doi{10.1007/978-3-319-24574-4_28}
+
+Zhou, Z., Rahman Siddiquee, M. M., Tajbakhsh, N., & Liang, J. (2018). Unet++: A nested u-net architecture for medical image segmentation. In Deep learning in medical image analysis and multimodal learning for clinical decision support (pp. 3-11). Springer, Cham.
+\doi{10.48550/arXiv.1807.10165}
 
 }
 
