@@ -7,7 +7,8 @@
 #'
 #' @description Rotate and/or mirror images to create augmented training data. Optionally, apply a random shift in brightness, saturation and hue to a certain percentage of the images
 #'
-#' @param images  tibble containing magick images
+#' @param images  list. Output of \code{loadImages}. List with two items ($info: data frame with information about images, $img: tibble containing magick images)
+#' @param subset integer. Indices of images to process. Can be useful for only processing subsets of images (e.g. training images, not test/validation images).
 #' @param rotation_angles   integer. Angles in which to rotate images using \code{\link[magick]{image_rotate}})?
 #' @param flip  logical. mirror along horizontal axis (turn images upside-down using \code{\link[magick]{image_flip}})?
 #' @param flop  mirror along vertical axis (switch left and right) using \code{\link[magick]{image_flop}})?
@@ -34,6 +35,7 @@
 #' images_can_aug
 #'
 dataAugmentation <- function(images,
+                             subset = NULL,
                              rotation_angles = 0,   # for understory, set to 0 only
                              flip = FALSE,
                              flop = FALSE,
@@ -56,6 +58,11 @@ dataAugmentation <- function(images,
 
   if(any(rotation_angles %% 90 != 0)) warning("Some rotation_angles are not multiples of 90. These rotated images will have different dimensions than the originals and might not be valid model input. ")
  
+  if(!is.null(subset)) {
+    images$info <- images$info[subset,]
+    images$img <- images$img[subset]
+  }
+  
   # apply rotation to all images 
   images_aug_list <- lapply(rotation_angles, FUN = function(degrees) magick::image_rotate(images$img, degrees = degrees))
   images_aug_info <- lapply(rotation_angles, FUN = function(x) data.frame(cbind(images$info, rotation = x)))

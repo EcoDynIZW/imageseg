@@ -4,16 +4,24 @@
 \alias{imagesToKerasInput}
 \title{Convert magick images in tibble to array for keras}
 \usage{
-imagesToKerasInput(images, type = NULL, grayscale = NULL, n_class = 1)
+imagesToKerasInput(
+  images,
+  subset = NULL,
+  type = NULL,
+  grayscale = NULL,
+  n_class = 1
+)
 }
 \arguments{
-\item{images}{tibble containing magick images (e.g. output of \code{loadImages})}
+\item{images}{list. Output of \code{loadImages} or \code{dataAugmentation}. List with two items ($info: data frame with information about images, $img: tibble containing magick images)}
+
+\item{subset}{integer. Indices of images to process. Can be useful for only processing subsets of images (e.g. training images, not test/validation images).}
 
 \item{type}{character. Can be "image" or "mask" and will set color channels of array accordingly (optional).}
 
 \item{grayscale}{logical. Defines color channels of images: 1 if code{TRUE}, 3 if \code{FALSE}.}
 
-\item{n_class}{For mask images, how many classes do they contain? (note that binary classifications like the canopy model have 1 class only - sky)}
+\item{n_class}{For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)}
 }
 \value{
 An array with the following dimensions: image, height, width, channels

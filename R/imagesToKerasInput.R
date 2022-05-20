@@ -2,10 +2,11 @@
 #' Convert magick images in tibble to array for keras
 #'
 #' @description This function converts a tibble of images into input for TensorFlow models in keras. Specifically, images are converted to 4D arrays (image, height, width, channels). It can process color images and masks (for model training).
-#' @param images tibble containing magick images (e.g. output of \code{loadImages})
+#' @param images list. Output of \code{loadImages} or \code{dataAugmentation}. List with two items ($info: data frame with information about images, $img: tibble containing magick images)
+#' @param subset integer. Indices of images to process. Can be useful for only processing subsets of images (e.g. training images, not test/validation images).
 #' @param type character. Can be "image" or "mask" and will set color channels of array accordingly (optional).
 #' @param grayscale logical. Defines color channels of images: 1 if code{TRUE}, 3 if \code{FALSE}.
-#' @param n_class For mask images, how many classes do they contain? (note that binary classifications like the canopy model have 1 class only - sky)
+#' @param n_class For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)
 #'
 #' @details The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'colorspace'.
 #' \code{type = "image"} can have either colorspace "sRGB" or "Gray", masks are always "Gray". color images have three color channels in the arrays, grayscale images have one color channel.
@@ -43,11 +44,18 @@
 #' str(x)   # a 4D array, with an attribute data frame
 #'
 imagesToKerasInput <- function(images,
+                               subset = NULL,
                                type = NULL,
                                grayscale = NULL,
-                               n_class = 1) {
+                               n_class = 1
+                               ) {
 
 
+  if(!is.null(subset)) {
+    if(!is.null(images$info)) images$info <- images$info[subset,]
+    images$img <- images$img[subset]
+  }
+  
   # checks
   image_info_df <- magick::image_info(images$img)
 
@@ -111,13 +119,16 @@ imagesToKerasInput <- function(images,
   # Image workflow
 
   # convert RGB images to matrices, and store results in arrays
+  scale <- T
+  scaling_value <- ifelse(scale, 255, 1)
+  
   if(channels == 3) {
-    images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]) / 255)   # Hex values to integer, integer to float (0...1)
+    images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]) / scaling_value)   # Hex values to integer, integer to float (0...1)
   }
 
   if(channels == 1) {
     if(n_class == 1){    # single output class
-      images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]) / 255)   # Hex values to integer, integer to float (0...1)
+      images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]) / scaling_value)   # Hex values to integer, integer to float (0...1)
 
     } else {  # multiple output classes
       images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]))        # Hex values to integer,

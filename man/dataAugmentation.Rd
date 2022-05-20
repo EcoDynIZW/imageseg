@@ -6,6 +6,7 @@
 \usage{
 dataAugmentation(
   images,
+  subset = NULL,
   rotation_angles = 0,
   flip = FALSE,
   flop = FALSE,
@@ -16,7 +17,9 @@ dataAugmentation(
 )
 }
 \arguments{
-\item{images}{tibble containing magick images}
+\item{images}{list. Output of \code{loadImages}. List with two items ($info: data frame with information about images, $img: tibble containing magick images)}
+
+\item{subset}{integer. Indices of images to process. Can be useful for only processing subsets of images (e.g. training images, not test/validation images).}
 
 \item{rotation_angles}{integer. Angles in which to rotate images using \code{\link[magick]{image_rotate}})?}
 
