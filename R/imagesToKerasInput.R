@@ -7,10 +7,13 @@
 #' @param type character. Can be "image" or "mask" and will set color channels of array accordingly (optional).
 #' @param grayscale logical. Defines color channels of images: 1 if code{TRUE}, 3 if \code{FALSE}.
 #' @param n_class For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)
+#' @param max integer. Maximum value of output color values range. Can be 1 or 255.
 #'
 #' @details The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'colorspace'.
 #' \code{type = "image"} can have either colorspace "sRGB" or "Gray", masks are always "Gray". color images have three color channels in the arrays, grayscale images have one color channel.
 #' \code{n_class} is only relevant for masks. It determines the dimensions of the output. The default 1 is the (binary case). Higher values are for multi-class cases. If n_class is 2 or larger, keras::to_categorical() will be applied, and the \code{\link{u_net}} model will use softmax instead of sigmoid activation in the final layer.
+#' 
+#' By default, color value range will be 0-1. Alternatively, set \code{max} to 255 to create color value range 0-255 (e.g. to create input for Habitat-Net models).
 #'
 #' @return An array with the following dimensions: image, height, width, channels
 #' @export
@@ -47,8 +50,8 @@ imagesToKerasInput <- function(images,
                                subset = NULL,
                                type = NULL,
                                grayscale = NULL,
-                               n_class = 1
-                               ) {
+                               n_class = 1,
+                               max = 1) {
 
 
   if(!is.null(subset)) {
@@ -119,8 +122,8 @@ imagesToKerasInput <- function(images,
   # Image workflow
 
   # convert RGB images to matrices, and store results in arrays
-  scale <- T
-  scaling_value <- ifelse(scale, 255, 1)
+  if(!max %in% c(1, 255)) stop("'max' must be 1 or 255")
+  scaling_value <- ifelse(max == 1, 255, 1)
   
   if(channels == 3) {
     images_proc <- lapply(images$img,  FUN = function(x) as.integer(x[[1]]) / scaling_value)   # Hex values to integer, integer to float (0...1)
