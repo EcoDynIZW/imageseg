@@ -23,6 +23,7 @@ Sys.setenv(RETICULATE_PYTHON = "")
 library(keras)
 ```
 
+
 # Introduction
 
 The imageseg package provides function that allow users to extract information from vegetation photos using image segmentation and sophisticated deep learning models, but it tries its best to make it as simple to use as possible. Thus, most of the complexity is happening behind the curtains, and users only need to provide input data (images) and download pre-trained models. 
@@ -333,12 +334,12 @@ If you only want to use the pre-trained models for predictions on your own photo
 While it is possible to run everything on CPU, deep learning applications often benefit from running on graphics cards (GPUs). More specifically, Nvidia GPUs are supported via the CUDA library. On our workstation we used an Nvidia GTX 1660 Super GPU with the following software:
 
 
-* R 4.1.1
+* R 4.1.2
 * CUDA v10.1.105 
 * Keras 2.4.3 (installed automatically by install_keras())
 * TensorFlow 2.2.0 (installed automatically by install_keras())
-* R package keras (2.6.1)
-* R package tensorflow (2.4.0)
+* R package keras (2.8.0)
+* R package tensorflow (2.8.0)
 
 
 ## Installation of imageseg
@@ -543,6 +544,9 @@ If you are new to neural networks and keras, please familiarize yourself with th
 Many of the functions we used above to create predictions are also useful for model training.
 
 
+
+
+
 ## Load training data (images + masks)
 
 Training data consist of pairs of images: the input color images and the binary output, which the model uses to learn from.
@@ -551,7 +555,7 @@ In this vignette we use some training data that are included in the package. You
 
 As with the predictions, we load the images into R using the `loadImages` function
 
-Load habitat images
+Load canopy images
 ```{r}
 wd_images <- system.file("images/canopy/resized",
                          package = "imageseg")
@@ -567,6 +571,46 @@ masks  <- loadImages(wd_masks)
 ```
 
 
+## Split data in test / training / validation data sets (throughout)
+
+We split images into training / test / validation data. In this example we use a 70 / 20 / 10% split. Training data will be augmented in the next step, validation and test images not.
+
+We can do it manually, but here is a little function that can help create reproducible data splits.
+
+```{r}
+split_data <- function(n, frac_test = NULL, frac_val = NULL, seed) {
+  set.seed(seed)   # for reproducible splitting
+
+  if(is.null(frac_test)) frac_test <- 0
+  if(is.null(frac_val))  frac_val <- 0
+  
+  split_tmp <- sample(rep(1:3, 
+                          diff(floor(n * c(0, frac_test, (frac_test + frac_val), 1)))))
+  
+  test  <- which(split_tmp == 1)
+  validation  <- which(split_tmp == 2)
+  train <- which(split_tmp == 3)
+  
+  return(list(index_test = test,
+              index_val = validation,
+              index_train = train))
+}
+
+```
+
+
+```{r}
+test_split <- 0.2           # 20% of images for testing
+validation_split <- 0.1     # 10% of images for validation
+
+split_tmp <- split_data(n = nrow(images$info), frac_test = test_split, frac_val = validation_split, seed = 100)
+
+# get indices of values 1 (test), 2 (validation), 3 (training images)
+test_index   <- split_tmp$index_test
+val_index    <- split_tmp$index_val
+train_index  <- split_tmp$index_train
+```
+
 
 ## Data augmentation
 
@@ -577,6 +621,7 @@ If data augmentation is used, the masks need to be adjusted in the same way as t
 Data augmentation of the images.
 ```{r}
 images_aug <- dataAugmentation(images = images, 
+                               subset = train_index,
                                rotation_angles = c(0, 90, 180, 270),
                                flip = TRUE, 
                                flop = TRUE)
@@ -585,6 +630,7 @@ images_aug <- dataAugmentation(images = images,
 Corresponding data augmentation of the masks
 ```{r}
 masks_aug <- dataAugmentation(images = masks, 
+                              subset = train_index,
                               rotation_angles = c(0, 90, 180, 270),
                               flip = TRUE, 
                               flop = TRUE)
@@ -609,34 +655,43 @@ Color shifts are only applied if requested by the user. The arguments `fraction_
 
 ## Convert images to arrays for keras
 
-As for the predictions, images are converted to model input (arrays) with `imagesToKerasInput`. Here, we load the color images (x_all) and prediction masks (y_all) separately.
+As for the predictions, images are converted to model input (arrays) with `imagesToKerasInput`. Here, we load the color images (x_train) and prediction masks (y__train) separately.
 
 ```{r}
-x_all <- imagesToKerasInput(images_aug, type = "image")
-y_all <- imagesToKerasInput(masks_aug, type = "mask")
+x_train <- imagesToKerasInput(images_aug, type = "image")
+y_train <- imagesToKerasInput(masks_aug, type = "mask")
 ```
 
-## Split data in training and test data
 
-Above we loaded all images together. To evaluate model fit, we need to set aside some test images. 
-
-Here, we select 20% of the total images and keep them aside for testing. They will not be used during training. Note the 20% are for demonstration and not a rule. Use your own best judgement when training models.
+Likewise, we convert the test and validation images to arrays.
 
 ```{r}
-set.seed(100)
-test_split <- 0.2
-test_index <- sample(1:nrow(x_all), round(nrow(x_all) * test_split))
+x_test <- imagesToKerasInput(images_aug, type = "image", subset = test_index)
+y_test <- imagesToKerasInput(masks_aug, type = "mask", subset = test_index)
 
-x_test  <- x_all[test_index,,,]
-y_test  <- y_all[test_index,,,, drop = FALSE]
-
-x_train <- x_all[-test_index,,,]
-y_train <- y_all[-test_index,,,, drop = FALSE]
-
+x_val <- imagesToKerasInput(images_aug, type = "image", subset = val_index)
+y_val <- imagesToKerasInput(masks_aug, type = "mask", subset = val_index)
 ```
 
-`drop = FALSE` is necessary to prevent R from dropping the last (4th) dimension of the array containing the masks (due to there being only 1 channel). The model expects this dimension to be present.
+<!-- ## Split data in training and test data -->
 
+<!-- Above we loaded all images together. To evaluate model fit, we need to set aside some test images.  -->
+
+<!-- Here, we select 20% of the total images and keep them aside for testing. They will not be used during training. Note the 20% are for demonstration and not a rule. Use your own best judgement when training models. -->
+
+<!--  ```{r} -->
+<!--  set.seed(100) -->
+<!--  test_split <- 0.2 -->
+<!--  test_index <- sample(1:nrow(x_all), round(nrow(x_all) * test_split)) -->
+<!--   -->
+<!--  x_test  <- x_all[test_index,,,] -->
+<!--  y_test  <- y_all[test_index,,,, drop = FALSE] -->
+<!--   -->
+<!--  x_train <- x_all[-test_index,,,] -->
+<!--  y_train <- y_all[-test_index,,,, drop = FALSE] -->
+<!--  ``` -->
+
+<!-- `drop = FALSE` is necessary to prevent R from dropping the last (4th) dimension of the array containing the masks (due to there being only 1 channel). The model expects this dimension to be present. -->
 
 
 
@@ -652,6 +707,8 @@ It provides model architectures flexibly, and lets users adjust:
 * number of layers per block. 
 
 The latter point is relevant since the original Habitat-Net model had 3 convolutional layers per block as opposed to the usual 2 in U-Net. We therefore added an argument "layers_per_block", but found no advantage of using 3 layers and thus used 2 layers (as in the standard U-Net architecture) for our pre-trained models. 
+
+It is also possible to create a U-Net++ architecture with the `u_net_plusplus` function. the main difference to standard U-Net is the introduction of nested, dense skip pathways (see Zhou et al. 2018)
 
 Here, we create a model architecture for input of 256x256 pixels in the standard U-Net architecture, but with 16 filters only (instead of 64 in the original U-Net, to simplify things and reduce model run time). See `?u_net` for details. There are many more things one can adjust, e.g. dropout rate, whether to use batch normalization, and possible more target classes (for other classification problems).
 
@@ -701,7 +758,7 @@ epochs <- 50
 batch_size <- 8 
 ```
   
-Now we can start model training with the `fit` function. Note we also set `validation_split`, which automatically keeps aside 15% of training data and checks validation loss and accuracy on these images. It can be used to prevent overfitting. 
+Now we can start model training with the `fit` function. Note we also set `validation_data` to use the validation data we created above. Alternatively, one can use `validation_split` (which automatically keeps aside an adjustable fraction of training data), but that would in this example imply using augmented data for validation, which is usually not recommended. In both cases, validation data are used to check validation loss and accuracy during training in order to prevent overfitting. 
 
 ```{r}
 history <- model %>% fit(
@@ -709,7 +766,8 @@ history <- model %>% fit(
   y_train, 
   epochs = epochs, 
   batch_size = batch_size,   
-  validation_split = 0.15
+  # validation_split = 0.15
+  validation_data = list(x_val, y_val),
 )
 ```
   
@@ -740,12 +798,12 @@ print(scores)
 
 As above we can use the trained model to do predictions (ideally on unseen data). We will use the test data for demonstration. 
 
-```{r}
+```{r out.width = '90%'}
 out <- imageSegmentation(model, x = x_test)
 out$examples
 ```
 
-The left column shows the input image, central column the predictions (as probabilities), and the right column the binary canopy masks (based on the central column, with a threshold of 0.5). The red number is the canopy cover value (based on the binary mask). 
+The left column shows the input image, central column the predictions (as probabilities), and the right column the binarized canopy masks (based on the central column, with a threshold of 0.5). 
 
 It's not perfect and the gray color in some images of the central column indicates the model is not too certain, but this model was trained on only `r nrow(x_train)` images, so this performance is still remarkably good.
 
@@ -819,10 +877,6 @@ So far, all predictions were binary. Internally, these networks only learn how t
 
 Here we will give an example demonstrating the fundamentals of image segmentation with multiple classes. The example contains microscopic images in which the model learns to differentiate red blood cells, bacteria and background. 
 
-<!-- The second example uses MNIST database of handwritten digits which is included in Keras. It is normally used for image classification ("Which digit is written in the image?"), but for demonstration we will use it in image segmentation.  -->
-
-
-
 
 ## Example 1: Bacteria detection with darkfield microscopy
 
@@ -893,21 +947,26 @@ y <- imagesToKerasInput(images = mask,
 ```
 
 
-Define the test/training/validation split:
+
+Define the test/training/validation split and create test and training data. In this example, we don't do data augmentation and can therefore use validation_split directly in the model fitting function. We therefore don't need to explicitly generate the validation data beforehand.
+
+
 ```{r}
-test_split <- 0.2          # 20% of images used for testing, 80% for training
-validation_split <- 0.15   # 15% of training images for validation
+test_split <- 0.2           # 20% of images for testing
+validation_split <- 0.1     # 10% of images for validation
+
+split_tmp <- split_data(n = nrow(x), frac_test = test_split, seed = 100)
+
+index_test   <- split_tmp$index_test
+index_train  <- split_tmp$index_train
 ```
 
-And create test and training data
-```{r}
-index_test <- sample(1:nrow(x),size = nrow(x) * test_split)
 
+```{r}
 x_test <- x[index_test,,,]
 y_test <- y[index_test,,,, drop = FALSE]
-
-x_train <- x[-index_test,,,]
-y_train <- y[-index_test,,,, drop = FALSE]
+x_train <- x[index_train,,,]
+y_train <- y[index_train,,,, drop = FALSE]
 ```
 
 
@@ -1010,9 +1069,23 @@ out$examples[2]
 
 ### Example 1B: More complex model
 
-Here we create a more realistic example with some extras: data augmentation, using a sampling generator, callbacks to prevent overfitting, and a few tweaks to the model.
+Here we create a more realistic example with some extras: data augmentation, using a sampling generator, callbacks to prevent overfitting, and a different model architecture (U-Net++ instead of U-Net).
 
 Be careful, it requires lots of memory, so better only try this if you have 32Gb or more of RAM!
+
+First, we split the data
+```{r}
+test_split <- 0.2           # 20% of images for testing
+validation_split <- 0.1     # 10% of images for validation
+
+split_tmp <- split_data(n = nrow(img$info), frac_test = test_split, frac_val = validation_split, seed = 100)
+
+# get indices of values 1 (test), 2 (validation), 3 (training images)
+test_index   <- split_tmp$index_test
+val_index    <- split_tmp$index_val
+train_index  <- split_tmp$index_train
+```
+
 
 
 For data augmentation we rotate images, mirror them along their horizontal and vertical axes, and apply some random shifts in brightness, saturation and hue to 20% of the images.
@@ -1020,50 +1093,69 @@ For data augmentation we rotate images, mirror them along their horizontal and v
 ```{r}
 img_aug <- dataAugmentation(images = img,
                             rotation_angles = c(0, 90, 180, 270),
+                            subset = train_index,
                             flip = TRUE, 
                             flop = TRUE,
                             fraction_random_BSH = 0.2)
 
 mask_aug <- dataAugmentation(images = mask,
+                             subset = train_index,
                              rotation_angles = c(0, 90, 180, 270),
                              flip = TRUE, 
                              flop = TRUE)
 ```
 
 
+<!-- # ```{r} -->
+<!-- # img_aug$img[1001] -->
+<!-- # magick::image_modulate(mask_aug$img[1001], brightness = 10000) -->
+<!-- # ``` -->
+
+
 The images are converted to keras input (arrays):
 ```{r}
-x <- imagesToKerasInput(img_aug)
-y <- imagesToKerasInput(images = mask_aug, 
-                        type = "mask",
-                        n_class = n_classes)
+x_train <- imagesToKerasInput(img_aug)
+y_train <- imagesToKerasInput(images = mask_aug,
+                              type = "mask",
+                              n_class = n_classes)
 ```
 
 Next, we split the augmented data into test / training and validation data. During model training we use a sampling generator to prevent memory problems, but when we do so we need to explicitly provide validation data and can't just define `fit(..., validation_split = ...)` like we did above.
 
 
-
 ```{r}
-# train / validation / test split
-set.seed(100)   # for reproducibility
-
-# select training images (rest is for testing /validation)
-train_index      <- sort(sample(1:nrow(x), round(nrow(x) * (1 - test_split)))) 
-
-# select validation (rest is training)
-validation_index <- sort(sample(train_index, round(length(train_index) * validation_split)))  
+# # train / validation / test split
+# set.seed(100)   # for reproducibility
+# 
+# # select training images (rest is for testing /validation)
+# train_index      <- sort(sample(1:nrow(x), round(nrow(x) * (1 - test_split)))) 
+# 
+# # select validation (rest is training)
+# validation_index <- sort(sample(train_index, round(length(train_index) * validation_split)))  
 
 # subset test data
-x_test <- x[-train_index,,,]
-y_test <- y[-train_index,,,, drop = FALSE]
+x_test <- imagesToKerasInput(img, 
+                             subset = test_index)
+y_test <- imagesToKerasInput(images = mask,
+                             subset = test_index,
+                             type = "mask",
+                             n_class = n_classes)
+# x_test <- x[test_index,,,]
+# y_test <- y[test_index,,,, drop = FALSE]
 
 # subset validation data
-x_val <- x[validation_index,,,]
-y_val <- y[validation_index,,,, drop = FALSE]
+x_val <- imagesToKerasInput(img, 
+                             subset = val_index)
+y_val <- imagesToKerasInput(images = mask,
+                             subset = val_index,
+                             type = "mask",
+                             n_class = n_classes)
+# x_val <- x[val_index,,,]
+# y_val <- y[val_index,,,, drop = FALSE]
 
-# subset training data
-x_train <- x[train_index[!train_index %in% validation_index],,,]
-y_train <- y[train_index[!train_index %in% validation_index],,,, drop = FALSE]
+# # subset training data
+# x_train <- x[train_index[!train_index %in% validation_index],,,]
+# y_train <- y[train_index[!train_index %in% validation_index],,,, drop = FALSE]
 ```
 
 
@@ -1083,14 +1175,16 @@ sampling_generator <- function(x_data, y_data, batch_size) {
 ```
 
 
-Define the model. Here we use 32 instead of 16 filters and define a 5% dropout.
+Define the model. Here we use a U-Net++ architecture with 32 filters and 3 output classes.
 
 ```{r}
-model <- u_net(256, 256, 
-               n_class = n_classes,
-               filters = 32,
-               dropout = 0.05)
+model <- u_net_plusplus(net_w = 256,
+                        net_h = 256,
+                        blocks = 3,
+                        n_class = n_classes,
+                        filters = 32)
 ```
+
 
 Model compilation is identical to the model in Example 1A.
 
@@ -1137,7 +1231,7 @@ plot_history
 ```
 
 
-MOdel evaluation:
+Model evaluation:
 ```{r}
 scores <- model %>% evaluate(
   x_test, y_test, verbose = 0
@@ -1155,171 +1249,7 @@ out$examples[1]
 out$examples[2]
 ```
 
-
-
-<!-- ## Example 2: Separate handwritten digits from their background and edges -->
-
-<!-- This example looks more complicated than above because we don't start with images on a hard disk, but with training data included in R. So we need to do some pre-processing to create a data set for demonstration. In real-world applications, you can use all the functions shown above in Part 2 and in the Example 1 of Part 4, and only need to change the argument `n_class` in `u_net()`. All the other functions would be exactly the same as shown above and not hacky as below.  -->
-
-<!-- The task: Classify image background, the written digit, and the outline of the digits as three separate classes.  -->
-
-<!-- ### Dataset preparation -->
-
-<!-- This section contains all the pre-processing for building a small image segmentation data set from the MNIST data. None of this is necessary if you work with read image data. It is only for demonstration. Many of these tasks (and more) are normally done internally by our package. -->
-
-
-
-
-<!-- Load MNIST dataset (this can take a while when you first run it). -->
-
-<!-- ```{r} -->
-<!-- mnist <- dataset_mnist() -->
-<!-- x_train <- mnist$train$x -->
-<!-- x_test  <- mnist$test$x -->
-<!-- ``` -->
-
-<!-- Subset for faster model training.  -->
-<!-- ```{r} -->
-<!-- x_train <- x_train[1:1000,,] -->
-<!-- x_test  <- x_test[1:100,,] -->
-<!-- ``` -->
-
-
-<!-- U-net requires RGB (color) images as input, but MNIST data are grayscale. For demonstration only, we will convert the grayscale MNIST digits to color images.  -->
-
-<!-- ```{r} -->
-<!-- # make fake RGB and add some Noise -->
-<!-- x_train_rgb <- array(NA, dim = c(1000, 28, 28, 3)) -->
-<!-- x_train_rgb [,,,1] <- x_train / 1.2 + rpois(length(x_train), 10)     # Red -->
-<!-- x_train_rgb [,,,2] <- x_train / 2 + rpois(length(x_train), 7) + 10   # Green -->
-<!-- x_train_rgb [,,,3] <- x_train / 2 + rpois(length(x_train), 20) + 20  # Blue -->
-<!-- ``` -->
-
-
-<!-- This is what the channels look like: -->
-<!-- ```{r} -->
-<!-- par(mfrow = c(1,3)) -->
-<!-- image(t(x_train_rgb[1,,,1]), main = "Red", asp = 1, ylim = c(1, 0)) -->
-<!-- image(t(x_train_rgb[1,,,2]), main = "Green", asp = 1, ylim = c(1, 0)) -->
-<!-- image(t(x_train_rgb[1,,,3]), main = "Blue", asp = 1, ylim = c(1, 0)) -->
-
-<!-- ``` -->
-
-<!-- Here is how these three channels together create a color image: -->
-
-<!-- ```{r} -->
-<!-- magick::image_read(as.raster(x_train_rgb[1,,,] / 255)) -->
-<!-- ``` -->
-
-<!-- We need to process the test data in the same way: -->
-<!-- ```{r} -->
-<!-- x_test_rgb <- array(NA, dim = c(dim(x_test), 3)) -->
-<!-- x_test_rgb [,,,1] <- x_test / 1.5 + rpois(length(x_test), 10) -->
-<!-- x_test_rgb [,,,2] <- x_test / 2 + rpois(length(x_test), 7) + 10 -->
-<!-- x_test_rgb [,,,3] <- x_test / 4 + rpois(length(x_test), 20) + 20 -->
-<!-- ``` -->
-
-<!-- Rescale all input images to 0...1 for Keras models (instead of 0...255). -->
-<!-- ```{r} -->
-<!-- # rescale -->
-<!-- #x_train <- x_train / 255 -->
-<!-- x_train_rgb <- x_train_rgb / 255 -->
-<!-- #x_test <- x_test / 255 -->
-<!-- x_test_rgb <- x_test_rgb / 255 -->
-<!-- ``` -->
-
-
-<!-- In our little example, we also need to make training labels for each pixel. To do that, we will simply separate the original grayscale into 3 classes based on their brightness. Again, this is only for demonstration that the workflow is compatible with multi-class models. -->
-
-
-<!-- ```{r} -->
-<!-- n_classes <- 3 -->
-
-<!-- # brightness as list of matrices -->
-<!-- y_train_list <- purrr::array_branch(x_train, 1) -->
-
-<!-- # define 3 classes in every image (requires conversion to vector) -->
-<!-- y_train_list2 <- lapply(y_train_list, FUN = function(x) as.numeric(cut(x, n_classes)) - 1) -->
-
-<!-- # put data back into array -->
-<!-- y_train_tmp <- array(do.call(c, y_train_list2), dim = c(28, 28, 1000)) -->
-
-<!-- # change order or array dimensions -->
-<!-- y_train <- aperm(y_train_tmp, c(3,1,2)) -->
-
-<!-- # example training mask with 3 classes  -->
-<!-- image(t(y_train[1,,]), ylim = c(1, 0)) -->
-
-<!-- #(t() and ylim are necessary for showing mask upright in image()) -->
-<!-- ``` -->
-
-
-
-
-<!-- Convert the training data masks to categorical (this normally happens automatically in imagesToKerasInput). -->
-<!-- ```{r} -->
-<!-- y_train <- to_categorical(y_train, n_classes) -->
-<!-- ``` -->
-
-
-
-<!-- ### Model training and predictions. -->
-
-<!-- Now we can create a U-Net architecture for input images of 28x28 pixels. The number of classes is defined in `n_class`. We need to reduce the number of blocks in the model to 2 (default is 4) to ensure the images can be pooled in the contracting path (28 pixels input size leads to 7x7 pixels after 2 contracting blocks and can't be pooled further).  -->
-
-<!-- ```{r} -->
-<!-- model <- u_net(28, -->
-<!--                28, -->
-<!--                n_class = n_classes, -->
-<!--                blocks = 2) -->
-<!-- ``` -->
-
-
-<!-- We will use the same loss and coefficients as above -->
-<!-- ```{r} -->
-<!-- dice_coef     <- imageseg:::dice_coef -->
-<!-- jaccard_index <- imageseg:::jaccard_index -->
-<!-- ``` -->
-
-
-<!-- Now we can compile the model. Note that we here choose a different loss than for the binary classification above. -->
-<!-- ```{r} -->
-<!-- model %>% compile( -->
-<!--   optimizer = optimizer_adam(), -->
-<!--   loss = loss_categorical_crossentropy, -->
-<!--   metrics = list(custom_metric("dice_coef", dice_coef), -->
-<!--                  custom_metric("jaccard_index", jaccard_index)) -->
-<!-- ) -->
-<!-- ``` -->
-
-
-<!-- and fit the model: -->
-<!-- ```{r} -->
-<!-- history <- model %>% fit( -->
-<!--   x_train_rgb , y_train, -->
-<!--   epochs = 30, batch_size = 128, -->
-<!--   validation_split = 0.2 -->
-<!-- ) -->
-<!-- ``` -->
-
-<!-- We chose 30 epochs for the model to run quickly. -->
-
-<!-- ```{r} -->
-<!-- plot(history) -->
-<!-- ``` -->
-
-
-<!-- Training is not complete at this point, but we can already use the model for predictions using imageSegmentation(). -->
-<!-- ```{r} -->
-<!-- out <- imageSegmentation(model, -->
-<!--                          x = x_test_rgb) -->
-<!-- ``` -->
-
-<!-- Here is one example output. The left column is model input, column 2 shows the most probable classes (hard to see), the remaining columns show the probabilities of each image class as grayscale.  -->
-
-<!-- ```{r out.height = '90%'} -->
-<!-- out$examples[1] -->
-<!-- ``` -->
+The U-Net++ architecture used here is less deep than the U-Net architecture in Example 1A above and has only about one quarter the number of parameters. Nevertheless, performance of U-Net++ is approximatly equal to a larger U-Net architecture. 
 
 
 # Part 5: Models using grayscale images
@@ -1368,7 +1298,6 @@ summary(grepl("mask", lf_subset))
 ```
 
 
-
 We can now load the images using loadImages, utilizing the argument fileNames this time:
 
 ```{r}
@@ -1387,17 +1316,46 @@ magick::image_append(c(mask$img[1], mask$img[2]), stack = T )
 ```
 
 
-Convert images and masks to 4D arrays for keras:
+Now let's split the data into test/training/validation datasets. 
+
 ```{r}
-x <- imagesToKerasInput(images = img, type = "image", grayscale = TRUE)
-y <- imagesToKerasInput(images = mask, type = "mask")
+test_split <- 0.2           # 20% of images for testing
+validation_split <- 0.1     # 10% of images for validation
+
+split_tmp <- split_data(n = nrow(img$info), frac_test = test_split, frac_val = validation_split, seed = 100)
+
+# get indices of values 1 (test), 2 (validation), 3 (training images)
+test_index   <- split_tmp$index_test
+val_index    <- split_tmp$index_val
+train_index  <- split_tmp$index_train
+```
+
+
+
+
+Convert images and masks to 4D arrays for keras:
+<!-- # ```{r} -->
+<!-- # x <- imagesToKerasInput(images = img, type = "image", grayscale = TRUE) -->
+<!-- # y <- imagesToKerasInput(images = mask, type = "mask") -->
+<!-- # ``` -->
+
+```{r}
+x_train <- imagesToKerasInput(img, 
+                              type = "image", 
+                              grayscale = TRUE, 
+                              subset = train_index)
+
+y_train <- imagesToKerasInput(images = mask,
+                              type = "mask",
+                              subset = train_index)
+
 ```
 
 
 In contrast to the examples above, x has only 1 color channel, i.e., it contains grayscale images:
 
 ```{r}
-str(x)    # the last value is the number of color channels
+dim(x_train)    # the last value is the number of color channels
 ```
 
 
@@ -1405,38 +1363,40 @@ str(x)    # the last value is the number of color channels
 Create the test/training/validation split:
 
 ```{r}
-test_split <- 0.2          # 20% of images used for testing, 80% for training
-validation_split <- 0.15   # 15% of training images for validation
+x_test <- imagesToKerasInput(img, 
+                             type = "image", 
+                             grayscale = TRUE, 
+                             subset = test_index)
 
-# train / validation / test split
-set.seed(100)   # for reproducibility
+y_test <- imagesToKerasInput(images = mask,
+                             type = "mask",
+                             subset = test_index)
 
-# select training images (rest is for testing /validation)
-train_index      <- sort(sample(1:nrow(x), round(nrow(x) * (1 - test_split))))
 
-# select validation (rest is training)
-validation_index <- sort(sample(train_index, round(length(train_index) * validation_split)))
+x_val <- imagesToKerasInput(img, 
+                            type = "image", 
+                            grayscale = TRUE, 
+                            subset = val_index)
 
-# subset test data
-x_test <- x[-train_index,,,, drop = FALSE]
-y_test <- y[-train_index,,,, drop = FALSE]
-
-# subset validation data
-x_val <- x[validation_index,,,, drop = FALSE]
-y_val <- y[validation_index,,,, drop = FALSE]
-
-# subset training data
-x_train <- x[train_index[!train_index %in% validation_index],,,, drop = FALSE]
-y_train <- y[train_index[!train_index %in% validation_index],,,, drop = FALSE]
+y_val <- imagesToKerasInput(images = mask,
+                            type = "mask",
+                            subset = val_index)
 ```
 
 
-Now we can create the U-Net model with the default 1 class for predictions (which in this case will be tumors).
+Now we can create the model architecture with the default 1 class for predictions (which in this case will be tumors). In this example we use U-Net with 32 filters, input images are grayscale, and output is one class.
 
 ```{r}
-model <- u_net(256,
-               256,
+# model <- u_net_plusplus(net_w = 256, 
+#                         net_h = 256, 
+#                         blocks = 3, 
+#                         grayscale = TRUE,
+#                         n_class = 1,
+#                         filters = 32)
+model <- u_net(net_w = 256, 
+               net_h = 256,  
                grayscale = TRUE,
+               n_class = 1,
                filters = 32)
 ```
 
@@ -1455,7 +1415,7 @@ Set epochs and batch size:
 
 ```{r}
 epochs <- 20
-batch_size <- 8
+batch_size <- 8   # U-Net++ requires lots of graphics memory. Reduce batch_size to avoid out-of-memory errors
 ```
 
 We use the same sampling generator as above:
@@ -1480,7 +1440,7 @@ history <- model %>% fit(
   epochs = epochs,
   steps_per_epoch = round(nrow(x_train) / batch_size),
   validation_data = list(x_val, y_val),
-  callbacks = callbacks
+  callbacks = callbacks  
 )
 ```
 
@@ -1515,7 +1475,5 @@ out$examples[2]
 ```
 
 
-Model performance is not perfect since it is a relatively small data set and we did not do any data augmentation here, which would almost certainly have improved predictions.
-
-Nevertheless it is decent for demonstration of an image segmentation workflow for grayscale images.
+Model performance is not perfect since it is a relatively small data set and we did not do any data augmentation here, which would almost certainly have improved predictions. Given these constraints model performance is still decent. 
 
