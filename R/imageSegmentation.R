@@ -188,7 +188,13 @@ imageSegmentation <- function(model,
 
     if(dim(x)[4] >= 2)        margin_x <- c(1)       # if color image as input
     if(dim(x)[4] == 1)        margin_x <- c(1,4)     # if grayscale image as input
+    
+    # if input images are in color range 0-255, change that to 0-1 to avoid error in as.raster (which defaults to max=1)
+    # allows processing of images for HabitatNet model
+    max_x <- max(x)
+    if(max_x > 1 & max_x <= 255) x <- x / 255
 
+    
       images_from_prediction <- tibble(
         image = x %>% array_branch(margin_x),
         prediction = predictions[,,,1] %>% array_branch(1),
@@ -235,7 +241,6 @@ imageSegmentation <- function(model,
 
 
   # if it's a binary classification (1 class only), calculate percentage of predicted areas
-
   if(n_class == 1){
 
     # remove subsetArea from values to summarize
