@@ -15,7 +15,6 @@ We provide pre-trained models for two forest structural metrics: canopy density 
 If you have training data available, you can also create and train your own models, or continue model training on the pre-trained models.
 
 The workflow implemented here can also be used for other image segmentation tasks, e.g. in the cell biology or for medical images. We provide two examples in the package vignette (bacteria detection in darkfield microscopy from color images, breast cancer detection in grayscale ultrasound images).
-
 }
 
 
@@ -46,13 +45,11 @@ This function assist in creating models in keras based on the U-Net architecture
 }
 }
 
-\section{Download pre-trained models}{
+\section{Download pre-trained models for forest structural metrics}{
 
-Links to the pre-trained models, example classifications and all training data used can be found in the GitHub readme under:
+Links to both pre-trained models (canopy and understory), example classifications and all training data used can be found in the GitHub readme under:
 
 \url{https://github.com/EcoDynIZW/imageseg}
-
-or in the package vignette.
 
 }
 
@@ -60,7 +57,7 @@ or in the package vignette.
 
 \section{Vignette}{
 
-The package contains a pdf vignette demonstrating the workflow for predictions and model training using various examples. It covers installation and setup, model predictions and training the forest structural models, and two more general applications. See \code{browseVignettes(package = "imageseg")}.
+The package contains a pdf vignette demonstrating the workflow for predictions and model training using various examples. It covers installation and setup, model predictions and training the forest structural models, and two more general applications of image segmentation (multi-class image segmentation of RGB microscopy images, and single-class image segmentation of grayscale ultrasound breast scan images). See \code{browseVignettes(package = "imageseg")}.
 
 }
 
