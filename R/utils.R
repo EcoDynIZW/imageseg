@@ -49,14 +49,13 @@ u_net_double_conv2d <- function(input,
                   padding = "same",
                   kernel_initializer = kernel_initializer) %>%
     when(batch_normalization ~ layer_batch_normalization(.), ~ .) %>%
-    #layer_activation_relu() %>%
     layer_activation("relu") %>%
+    
     layer_conv_2d(filters = filters,
                   kernel_size = kernel_size,
                   padding = "same",
                   kernel_initializer = kernel_initializer) %>%
     when(batch_normalization ~ layer_batch_normalization(.), ~ .) %>%
-    #layer_activation_relu()
     layer_activation("relu")
 }
 
@@ -70,17 +69,16 @@ u_net_triple_conv2d <- function(input,
     layer_conv_2d(filters = filters, kernel_size = kernel_size,
                   padding = "same", kernel_initializer = kernel_initializer) %>%
     when(batch_normalization ~ layer_batch_normalization(.), ~ .) %>%
-    #layer_activation_relu() %>%
     layer_activation("relu") %>%
+    
     layer_conv_2d(filters = filters, kernel_size = kernel_size,
                   padding = "same", kernel_initializer = kernel_initializer) %>%
     when(batch_normalization ~ layer_batch_normalization(.), ~ .) %>%
-    #layer_activation_relu()  %>%
     layer_activation("relu") %>%
+    
     layer_conv_2d(filters = filters, kernel_size = kernel_size,
                   padding = "same", kernel_initializer = kernel_initializer) %>%
     when(batch_normalization ~ layer_batch_normalization(.), ~ .) %>%
-    #layer_activation_relu()
     layer_activation("relu")
 }
 
