@@ -307,7 +307,7 @@ resizeImages <- function(imageDir,
                                                        paste0(gsub(".", "_", sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(lf_images[i])), fixed = TRUE),
                                                        ".", imageFormat_out)),
                                       compression = compression))
-      if(class(test) == "try-error") cat(paste(lf_images[i], test, sep = "\n"))
+      if("try-error" %in% class(test)) cat(paste(lf_images[i], test, sep = "\n"))
 
       setTxtProgressBar(pb, i)
 
