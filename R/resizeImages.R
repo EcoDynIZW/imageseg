@@ -14,10 +14,11 @@
 #' @param fileNames character. File names to load (they will still be filtered by \code{pattern}, if defined)
 #' @param pattern character. Pattern to search in file names
 #' @param patternInclude logical. Include images with pattern in file names (TRUE) or exclude (FALSE)
-#' @param type character. "canopy" or "understory". Will set image dimensions accordingly to predefined c(160, 256) and c(256, 256), respectively (optional). Alternatively, use \code{dimensions}.
+#' @param type character. "canopy" or "understory". Will set image dimensions accordingly to predefined c(256, 256) or c(160, 256), respectively (optional). Alternatively, use \code{dimensions}.
 #' @param dimensions integer. image dimensions provides as c(width, height) in pixels. If specified, overrides \code{type}
 #' @param validRegion character. If defined, use string as argument \code{geometry} in \code{\link[magick]{image_crop}} (output of \code{\link[magick]{geometry_area}}), which will crop all images to the same region before resizing (optional). If undefined, don't crop.
 #' @param preserveAspect logical. If TRUE, images will be cropped to aspect ratio of output before resizing (thus preserving original aspect ratio, but losing parts of the image). If FALSE, images will be simply resized from their input size to the desired output (not preserving aspect ratio).
+#' @param filter character. Resampling filter. Passed to argument \code{filter} in \code{\link[magick]{image_resize}}. See \code{magick::filter_types()} for available options. Default is LanczosFilter.
 #' @param colorspace character. If defined, image will be converted to the requested colorspace. If undefined, colorspace will remain unchanged. Must be a valid argument to  \code{magick::colorspace_types()}. In practice, only "sRGB" and "Gray" will be relevant.
 #' @param binary logical. If colorspace is "Gray", make the output binary?
 #' @param gravity if preserveAspect = TRUE and images need to be cropped, the \code{gravity} argument to use in \code{\link[magick]{image_crop}}.
@@ -26,7 +27,7 @@
 #' @param cores integer. Number of cores to use for parallel processing
 #' @param compression character. Compression type to use in \code{\link[magick]{image_write}}. See \code{\link[magick]{compress_types}}. By default, "Lossless" for grayscale images, "Undefined" for color images.
 #'
-#' @details Resizing is done by magick::image_resize() and will ensure that the resized images have exactly the desired dimensions.
+#' @details Resizing is done by \code{\link[magick]{image_resize}} and will ensure that the resized images have exactly the desired dimensions.
 #'
 #' If \code{preserveAspect = TRUE}, input images will first be cropped to the maximum area with the aspect ratio of the desired output (1:1 (square) for \code{type = "canopy"}, 5:8 for \code{type = "understory"}), by default in the center of the input image (argument \code{gravity}). This will usually lead to the loss of parts of the image, but the remaining part of the image is not deformed compared to the original.
 #' Alternatively, if \code{preserveAspect = FALSE}, input images will be resized to the requested dimensions without cropping (thus no loss of part of the image), but the aspect ratio changes. If aspect ratio changes too strongly it may negatively affect model performance.
@@ -78,6 +79,7 @@ resizeImages <- function(imageDir,
                          dimensions,
                          validRegion,
                          preserveAspect = TRUE,
+                         filter = NULL,
                          colorspace,
                          binary,
                          gravity = "Center",
@@ -200,7 +202,9 @@ resizeImages <- function(imageDir,
 
       # Option 1: force input image to output size, ignore aspect ratio
       if(!preserveAspect){
-        img_resize <- magick::image_resize(img, paste0(imgWidth, "x", imgHeight, "!"))
+        img_resize <- magick::image_resize(img, 
+                                           geometry = paste0(imgWidth, "x", imgHeight, "!"),
+                                           filter = filter)
       }
 
 
@@ -219,7 +223,9 @@ resizeImages <- function(imageDir,
 
         img_crop <- magick::image_crop(img, geometry = geom_to_crop, gravity = gravity, repage = TRUE)
 
-        img_resize <- magick::image_resize(img_crop, paste0(imgWidth, "x", imgHeight, "!"))
+        img_resize <- magick::image_resize(img_crop, 
+                                           geometry = paste0(imgWidth, "x", imgHeight, "!"),
+                                           filter = filter)
       }
 
       if(is.character(colorspace)) {
@@ -267,7 +273,9 @@ resizeImages <- function(imageDir,
 
       # Option 1: force input image to output size, ignore aspect ratio
       if(!preserveAspect){
-        img_resize <- magick::image_resize(img, paste0(imgWidth, "x", imgHeight, "!"))
+        img_resize <- magick::image_resize(img, 
+                                           geometry = paste0(imgWidth, "x", imgHeight, "!"),
+                                           filter = filter)
       }
 
       # Option 2: crop input image first to preserve aspect ratio
@@ -285,7 +293,9 @@ resizeImages <- function(imageDir,
 
         img_crop <- magick::image_crop(img, geometry = geom_to_crop, gravity = gravity, repage = TRUE)
 
-        img_resize <- magick::image_resize(img_crop, paste0(imgWidth, "x", imgHeight, "!"))
+        img_resize <- magick::image_resize(img_crop, 
+                                           geometry = paste0(imgWidth, "x", imgHeight, "!"),
+                                           filter = filter)
       }
 
 
