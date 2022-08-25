@@ -57,23 +57,37 @@ The vignette covers:
 
 # Forest structure model download
 
-The **pre-trained models** for forest canopy density and understory vegetation density are available for download:
+The models, example predictions, training data and R script for model training for both the canopy and understory model are available from Dryad as a single download:
 
-*Canopy model*: https://www.dropbox.com/s/rtsly7kfag9fzlh/imageseg_canopy_model.hdf5?dl=1
+https://doi.org/10.5061/dryad.x0k6djhnj
 
-*Understory model*: https://www.dropbox.com/s/9qvgcc9j5r36spp/imageseg_understory_model.hdf5?dl=1
 
-Please see the vignette for further information.
+See the "Usage Notes" section for details on the dataset. 
 
-**Example classifications** to give you an impression of model performance:
 
-*Canopy model examples*  https://www.dropbox.com/sh/ypxx5rknpgqolxk/AAATyhQ8-wIi5I9aGlekqn7ia?dl=0
+The models and script (without the training data) are also hosted on Zenodo and can be downloaded individually from:
 
-*Understory model examples* https://www.dropbox.com/sh/4gngdvk7km92clp/AAC2EtoB7lZiQefWVIwFiWZha?dl=0
+https://doi.org/10.5281/zenodo.6861157
+
+The **pre-trained models** for forest canopy density and understory vegetation density are available for download. The zip files contain the model (as .hdf5 files) and **example classifications** to give an impression of model performance and output:
+
+*Canopy model*: https://zenodo.org/record/6861157/files/imageseg_canopy_model.zip?download=1
+
+*Understory model*: https://zenodo.org/record/6861157/files/imageseg_understory_model.zip?download=1
+
+
+Please see the vignette for further information on how to use these models.
+
 
 
 # Training data download
 
-*Canopy training data*  https://www.dropbox.com/s/302yyoi7qil1hn5/canopy_training_data_imageseg.zip?dl=1
+Training data for both the canopy and understory model are included in the Dryad dataset download in the zip files:
 
-*Understory training data*  https://www.dropbox.com/s/s7o7x66l3wiqc6h/understory_training_data_imageseg.zip?dl=1
+*imageseg_canopy_training_data.zip* 
+
+*imageseg_understory_training_data.zip*
+
+For details, please see the Usage Notes and the info.txt files contained in the zip files.
+
+The training data are not required for users who only wish to use the pre-trained models on their own images.
