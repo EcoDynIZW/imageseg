@@ -144,7 +144,7 @@ imagesToKerasInput <- function(images,
                                  unique(image_info_df$width),
                                  channels))
 
-  for(i in 1:length(images_proc)){
+  for(i in 0:length(images_proc)){
     array_out[i,,,] <- images_proc[[i]]
   }
 
