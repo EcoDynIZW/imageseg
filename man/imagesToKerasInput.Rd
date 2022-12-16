@@ -20,7 +20,7 @@ imagesToKerasInput(
 
 \item{type}{character. Can be "image" or "mask" and will set color channels of array accordingly (optional).}
 
-\item{grayscale}{logical. Defines color channels of images: 1 if code{TRUE}, 3 if \code{FALSE}.}
+\item{grayscale}{logical. \code{TRUE} for grayscale images, \code{FALSE} for RGB images. If undefined (NULL), it will be inferred from the images (as long as all images have the same colorspace).}
 
 \item{n_class}{For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)}
 
@@ -33,7 +33,7 @@ An array with the following dimensions: image, height, width, channels
 This function converts a tibble of images into input for TensorFlow models in keras. Specifically, images are converted to 4D arrays (image, height, width, channels). It can process color images and masks (for model training).
 }
 \details{
-The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'colorspace'.
+The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'grayscale'.
 \code{type = "image"} can have either colorspace "sRGB" or "Gray", masks are always "Gray". color images have three color channels in the arrays, grayscale images have one color channel.
 \code{n_class} is only relevant for masks. It determines the dimensions of the output. The default 1 is the (binary case). Higher values are for multi-class cases. If n_class is 2 or larger, keras::to_categorical() will be applied, and the \code{\link{u_net}} model will use softmax instead of sigmoid activation in the final layer.
 
