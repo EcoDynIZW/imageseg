@@ -195,17 +195,17 @@ imageSegmentation <- function(model,
     if(max_x > 1 & max_x <= 255) x <- x / 255
 
     
-      images_from_prediction <- tibble(
+    images_from_prediction <- tibble(
         image = x %>% array_branch(margin_x),
         prediction = predictions[,,,1] %>% array_branch(1),
         prediction_binary = predictions_binary[,,,1] %>% array_branch(1)
-      ) %>%
-        map_depth(2, function(x) {
+      ) %>% 
+      as.list(
+      ) %>% 
+        map_depth(.depth = 2, function(x) {
           as.raster(x) %>% magick::image_read()
         }) %>%
         map(~do.call(c, .x))
-    }
-
 
 
   # if multiple classes, create array with most probable prediction class for each image
@@ -219,7 +219,7 @@ imageSegmentation <- function(model,
     images_from_prediction1 <- tibble(
       image = x %>% array_branch(1),
       prediction_most_likely = prediction_most_likely %>% array_branch(1) %>% map(~./n_class)
-    ) %>%
+    ) %>% as.list() %>%
       map_depth(2, function(x) {
         as.raster(x) %>% magick::image_read()
       }) %>%
@@ -227,7 +227,8 @@ imageSegmentation <- function(model,
 
     # probabilities of each class
     images_from_prediction2 <-
-      predictions %>% array_tree(c(1, 4))  %>%
+      predictions %>% array_tree(c(1, 4))  %>% 
+      as.list() %>%
       map_depth(2, function(x) {
         as.raster(x) %>% magick::image_read()
       }) %>%
