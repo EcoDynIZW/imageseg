@@ -1,7 +1,7 @@
 Package: imageseg
 Type: Package
 Title: Deep Learning Models for Image Segmentation
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
             person("Juergen", "Niedballa", email = "niedballa@izw-berlin.de", role = c("aut", "cre"),
                    comment = c(ORCID = "0000-0002-9187-2116")),
@@ -17,4 +17,4 @@ Encoding: UTF-8
 Imports: grDevices, keras, magick, magrittr, methods, purrr, stats, tibble, foreach, parallel, doParallel, dplyr
 Suggests: R.rsp, testthat
 VignetteBuilder: R.rsp
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
