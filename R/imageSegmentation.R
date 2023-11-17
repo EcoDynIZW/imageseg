@@ -200,13 +200,12 @@ imageSegmentation <- function(model,
         prediction = predictions[,,,1] %>% array_branch(1),
         prediction_binary = predictions_binary[,,,1] %>% array_branch(1)
       ) %>% 
-      as.list(
-      ) %>% 
+      as.list() %>% 
         map_depth(.depth = 2, function(x) {
           as.raster(x) %>% magick::image_read()
         }) %>%
         map(~do.call(c, .x))
-
+    }
 
   # if multiple classes, create array with most probable prediction class for each image
   if(n_class != 1) {
