@@ -1,3 +1,9 @@
+# imageseg 0.5.1
+
+## bugfixes
+* imageSegmentation: fixed map_depth() error introduced with purrr >1.0.0
+
+
 # imageseg 0.5.0
 
 ## new functions
