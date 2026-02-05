@@ -8,9 +8,9 @@ The package can be found on CRAN:
 
 https://cran.r-project.org/web/packages/imageseg/index.html
 
-The preprint of the paper describing the package is available on bioRxiv:
+The paper describing the package was published in Methods in Ecology and Evolution:
 
-https://doi.org/10.1101/2021.12.16.469125
+https://doi.org/10.1111/2041-210X.13984
 
 
 # Installation
