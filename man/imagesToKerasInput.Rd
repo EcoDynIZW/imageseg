@@ -20,7 +20,7 @@ imagesToKerasInput(
 
 \item{type}{character. Can be "image" or "mask" and will set color channels of array accordingly (optional).}
 
-\item{grayscale}{logical. \code{TRUE} for grayscale images, \code{FALSE} for RGB images. If undefined (NULL), it will be inferred from the images (as long as all images have the same colorspace).}
+\item{grayscale}{logical. \code{TRUE} for grayscale images, \code{FALSE} for RGB images. If undefined (NULL), it will be inferred from the images (as long as all images have the same colorspace). See Details.}
 
 \item{n_class}{For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)}
 

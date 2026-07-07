@@ -1,3 +1,7 @@
+# imageseg 0.5.2
+
+* changed maintainer email
+
 # imageseg 0.5.1
 
 ## bugfixes
