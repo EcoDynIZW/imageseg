@@ -1,6 +1,7 @@
 # imageseg 0.5.2
 
 * changed maintainer email
+* removed vignette from package (it is still on GitHub page)
 
 # imageseg 0.5.1
 

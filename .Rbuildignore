@@ -1,4 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^vignettes_markdown
+^vignettes_markdown$
+^vignettes$
 ^LICENSE\.md$
