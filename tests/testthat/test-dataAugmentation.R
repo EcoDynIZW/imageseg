@@ -34,12 +34,12 @@ test_that("output size is correct number", {
 test_that("data frame is correct", {
   expect_true(nrow(images_can_aug$info) == length(list.files(wd_images_can)) * 6)
 
-  expect_equal(table(images_can_aug$info$rotation), structure(c(`0` = 33L, `90` = 11L, `180` = 11L, `270` = 11L), .Dim = 4L, .Dimnames = structure(list(
-    c("0", "90", "180", "270")), .Names = ""), class = "table"))
-  expect_equal(table(images_can_aug$info$flip), structure(c(`FALSE` = 55L, `TRUE` = 11L), .Dim = 2L, .Dimnames = structure(list(
-    c("FALSE", "TRUE")), .Names = ""), class = "table"))
-  expect_equal(table(images_can_aug$info$flop), structure(c(`FALSE` = 55L, `TRUE` = 11L), .Dim = 2L, .Dimnames = structure(list(
-    c("FALSE", "TRUE")), .Names = ""), class = "table"))
+  expect_equal(table(images_can_aug$info$rotation), structure(c(`0` = 33L, `90` = 11L, `180` = 11L, `270` = 11L), dim = 4L, dimnames = structure(list(
+    c("0", "90", "180", "270")), names = ""), class = "table"))
+  expect_equal(table(images_can_aug$info$flip), structure(c(`FALSE` = 55L, `TRUE` = 11L), dim = 2L, dimnames = structure(list(
+    c("FALSE", "TRUE")), names = ""), class = "table"))
+  expect_equal(table(images_can_aug$info$flop), structure(c(`FALSE` = 55L, `TRUE` = 11L), dim = 2L, dimnames = structure(list(
+    c("FALSE", "TRUE")), names = ""), class = "table"))
 
 })
 
